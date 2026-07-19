@@ -1,5 +1,5 @@
 # LET'S GOOOOOOOOOOOOOOO!!!!
-## Branch : milan-feature
+
 # To run backend server = npm run dev
 
 # BACKEND
@@ -24,4 +24,5 @@
 
 
 # BRANCHES (Add Branches HERE!!!!)
-## Branch : milan-feature
+Branch(Milan) : milan-feature
+Branch(Nethum) : nethum-feature-server
