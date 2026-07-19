@@ -15,3 +15,8 @@
 ### inside that file create local environment variables 
 ### 1. MONGO_LOCAL=your mongo db url
 ### 2. PORT=4000
+
+
+# FRONTEND
+## To run frontend server = npm run dev
+## npm install 
