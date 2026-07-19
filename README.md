@@ -21,3 +21,6 @@
 # FRONTEND
 ## To run frontend server = npm run dev
 ## Just install this = npm install 
+
+
+# BRANCHES (Add Branches HERE!!!!)
