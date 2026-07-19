@@ -19,4 +19,4 @@
 
 # FRONTEND
 ## To run frontend server = npm run dev
-## npm install 
+## Just install this = npm install 
