@@ -26,4 +26,5 @@
 # BRANCHES (Add Branches HERE!!!!)
 Branch(Milan) : milan-feature  
 Branch(Nethum) : nethum-feature-server  
-Branch(Adisha) : adisha-feature
+Branch(Adisha) : adisha-feature  
+Branch(omika) : omika-feature
