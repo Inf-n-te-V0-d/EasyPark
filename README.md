@@ -19,6 +19,21 @@
 
 
 # FRONTEND
+## Colour Palette
+EasyPark Design System
+
+Primary:      #22C55E
+Primary Hover: #16A34A
+Dark:         #0F172A
+Text:         #334155
+Background:   #F8FAFC
+White:        #FFFFFF
+Border:       #E2E8F0
+
+Font: Poppins
+Theme: Modern SaaS
+Border Radius: 12px
+
 ## To run frontend server = npm run dev
 ## Just install this = npm install 
 ## After the "git pull" enter "npm install" to get the dependencies of Tailwindcss
