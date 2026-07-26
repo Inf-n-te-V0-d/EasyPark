@@ -21,6 +21,7 @@
 # FRONTEND
 ## To run frontend server = npm run dev
 ## Just install this = npm install 
+## After the "git pull" enter "npm install" to get the dependencies of Tailwindcss
 
 
 # BRANCHES (Add Branches HERE!!!!)
