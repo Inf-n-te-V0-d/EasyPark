@@ -21,8 +21,11 @@
 # FRONTEND
 ## To run frontend server = npm run dev
 ## Just install this = npm install 
+## After the "git pull" enter "npm install" to get the dependencies of Tailwindcss
 
 
 # BRANCHES (Add Branches HERE!!!!)
-Branch(Milan) : milan-feature  
-Branch(Nethum) : nethum-feature-server
+Branch(Milan) : milan-feature      
+Branch(Nethum) : nethum-feature-server        
+Branch(Adisha) : adisha-feature    
+Branch(omika) : omika-feature    
