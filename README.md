@@ -40,14 +40,7 @@ Border Radius: 12px
 
 
 # BRANCHES (Add Branches HERE!!!!)
-<<<<<<< HEAD
 Branch(Milan) : milan-feature      
 Branch(Nethum) : nethum-feature-server        
 Branch(Adisha) : adisha-feature    
 Branch(omika) : omika-feature    
-=======
-Branch(Milan) : milan-feature  
-Branch(Nethum) : nethum-feature-server  
-Branch(Adisha) : adisha-feature  
-Branch(omika) : omika-feature
->>>>>>> f2ba204142c4ed68a5ebe4014163db07e8013314
