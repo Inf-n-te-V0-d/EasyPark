@@ -5,6 +5,10 @@ const cors = require("cors");
 
 const app = express();
 
+// routers
+const userSignInRouter = require("./routes/User/userSigninRoutes");
+const userSignUpRouter = require("./routes/User/userSignupRoutes");
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -14,6 +18,14 @@ app.use((req, res, next) => {
   console.log(`Path: ${req.path}`);
   next();
 });
+
+
+// Routes
+app.use("/signin", userSignInRouter);
+app.use("/signup", userSignUpRouter);
+
+
+
 
 // DB Connection
 /*mongoose
