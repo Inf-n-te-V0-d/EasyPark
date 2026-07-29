@@ -58,31 +58,40 @@ const Navbar = ({ onNavigate }) => {
                     <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
                     <div className="flex flex-col items-center justify-center gap-1">
                         <span
-                            className={`h-0.5 w-6 bg-current transition-transform ${isMenuOpen ? "translate-y-1 rotate-45" : ""}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${
+                                isMenuOpen ? "translate-y-1.5 rotate-45" : ""
+                            }`}
                         />
                         <span
-                            className={`h-0.5 w-6 bg-current transition-opacity ${isMenuOpen ? "opacity-0" : "opacity-100"}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-opacity duration-200 ${
+                                isMenuOpen ? "opacity-0" : "opacity-100"
+                            }`}
                         />
                         <span
-                            className={`h-0.5 w-6 bg-current transition-transform ${isMenuOpen ? "-translate-y-1 -rotate-45" : ""}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${
+                                isMenuOpen ? "-translate-y-1.5 -rotate-45" : ""
+                            }`}
                         />
                     </div>
                 </button>
             </div>
 
-            {isMenuOpen && (
-                <div className="fixed inset-x-0 top-full z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl md:hidden">
-                    <div className="flex min-h-full flex-col gap-6">
-                        <NavLinks
-                            links={links}
-                            mobile
-                            className="flex flex-col gap-4"
-                            onLinkClick={handleLinkClick}
-                        />
-                        <ActionButtons className="flex flex-col gap-3" onNavigate={onNavigate} />
-                    </div>
+            <div
+                className={`fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl md:hidden transition-all duration-300 ease-in-out ${
+                    isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
+                }`}
+                style={{ visibility: isMenuOpen ? "visible" : "hidden" }}
+            >
+                <div className="flex min-h-full flex-col gap-6">
+                    <NavLinks
+                        links={links}
+                        mobile
+                        className="flex flex-col gap-4"
+                        onLinkClick={handleLinkClick}
+                    />
+                    <ActionButtons className="flex flex-col gap-3" onNavigate={onNavigate} />
                 </div>
-            )}
+            </div>
         </nav>
     );
 };
