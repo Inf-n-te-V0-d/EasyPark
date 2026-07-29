@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import easyParkLogo from './assets/easypark-logo.png'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const Icon = ({ children, className = '' }) => <svg className={`fill-none stroke-current stroke-[1.9] ${className}`} viewBox="0 0 24 24" aria-hidden="true">{children}</svg>
 const CheckIcon = () => <Icon className="h-4 w-4"><path d="m5 12 4.2 4.2L19 6.8" /></Icon>
 
-export default function Login() {
+export default function Login({ onNavigate }) {
   const [form, setForm] = useState({ email: '', password: '', remember: false })
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
@@ -15,7 +14,7 @@ export default function Login() {
 
   return <main className="grid min-h-screen bg-slate-50 font-sans lg:grid-cols-[.94fr_1.06fr]">
     <section className="mx-auto flex min-h-screen w-[min(100%-42px,460px)] flex-col justify-center py-8 lg:w-[min(100%-80px,460px)]">
-      <img className="w-[196px]" src={easyParkLogo} alt="EasyPark" />
+      <img className="w-[196px]" src="/Logo_icon.png" alt="EasyPark" />
       <div className="relative mt-9 rounded-[18px] border border-slate-200 bg-white px-6 py-8 shadow-[0_18px_42px_rgba(15,23,42,.055)] sm:px-[34px] before:absolute before:top-0 before:left-8 before:h-[3px] before:w-12 before:rounded-b-lg before:bg-green-500 before:content-['']">
         <div className="mb-7"><span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.8px] text-slate-500"><i className="h-2 w-2 rounded-full bg-green-500 ring-4 ring-green-500/10" />Secure sign in</span><h1 className="mt-2 text-[32px] font-bold tracking-[-1.4px] text-slate-900">Welcome back<span className="text-green-500">.</span></h1><p className="mt-2 text-[13px] leading-6 text-slate-700">Your next easy parking experience is just a sign-in away.</p></div>
         <form className="grid gap-5" noValidate onSubmit={submit}>
@@ -25,7 +24,7 @@ export default function Login() {
           <button className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600" type="submit">Sign in to EasyPark<Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon></button>
         </form>
       </div>
-      <p className="mt-6 text-center text-[12px] text-slate-700">New to EasyPark? <a className="font-semibold text-green-600 hover:underline" href="#sign-up">Create an account</a></p><p className="mt-4 text-center text-[10px] text-slate-400">🔒 Your information is protected and secure.</p>
+      <p className="mt-6 text-center text-[12px] text-slate-700">New to EasyPark? <button type="button" className="font-semibold text-green-600 hover:underline" onClick={() => onNavigate?.('register')}>Create an account</button></p><p className="mt-4 text-center text-[10px] text-slate-400">🔒 Your information is protected and secure.</p>
     </section>
     <aside className="relative hidden place-items-center overflow-hidden bg-[linear-gradient(145deg,#0f172a,#123a2a_48%,#15803d)] p-12 text-white lg:grid">
       <div className="absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(255,255,255,.09)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.09)_1px,transparent_1px)] [background-size:42px_42px]" /><div className="absolute top-11 left-12 text-lg font-bold">easypark<span className="text-green-400">.</span></div>
