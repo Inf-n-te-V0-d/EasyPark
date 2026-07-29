@@ -1,10 +1,10 @@
 const NavLinks = () => {
 
     const links = [
-        "Home",
-        "Features",
-        "About",
-        "Contact"
+        { label: "Home", href: "#top" },
+        { label: "Features", href: "#features" },
+        { label: "About", href: "#about" },
+        { label: "Contact", href: "#contact" }
     ];
 
     return (
@@ -14,10 +14,11 @@ const NavLinks = () => {
             {links.map((link) => (
 
                 <li
-                    key={link}
-                    className="cursor-pointer font-medium hover:text-emerald-500 transition duration-300"
+                    key={link.label}
                 >
-                    {link}
+                    <a href={link.href} className="font-medium text-[#334155] transition duration-300 hover:text-[#16A34A]">
+                        {link.label}
+                    </a>
                 </li>
 
             ))}
