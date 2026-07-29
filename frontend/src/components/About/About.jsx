@@ -29,7 +29,7 @@ const About = () => (
             {['Malls & hospitals', 'Universities', 'Office complexes', 'Parking towers'].map((place) => <span key={place} className="rounded-full border border-[#BBF7D0] bg-white px-3.5 py-2 text-sm font-medium text-[#16A34A]">{place}</span>)}
           </div>
         </div>
-        <div className="rounded-[24px] border border-[#E2E8F0] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.06)] sm:p-7">
+        <div className="rounded-3xl border border-[#E2E8F0] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.06)] sm:p-7">
           <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-5"><div><p className="text-sm font-medium text-[#16A34A]">Your parking journey</p><h3 className="mt-1 text-xl font-semibold text-[#0F172A]">Simple from arrival to exit</h3></div><img src="/Logo_icon.png" alt="EasyPark" className="h-12 w-12 rounded-xl object-cover" /></div>
           <div className="mt-6 space-y-6">
             {steps.map(({ icon: Icon, title, text }, index) => <div key={title} className="flex gap-4"><div className="relative flex flex-col items-center"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#DCFCE7] text-[#16A34A]"><Icon /></span>{index < steps.length - 1 && <span className="mt-2 h-full w-px bg-[#BBF7D0]" />}</div><div className="pb-1"><p className="font-semibold text-[#0F172A]">{title}</p><p className="mt-1 text-sm leading-6 text-[#64748B]">{text}</p></div></div>)}
