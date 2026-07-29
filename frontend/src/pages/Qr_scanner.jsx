@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
 const QrScanner = ({ onNavigate }) => {
-    const userType = "staff"; // change to "staff" or another role to show generator + scanner
+    const userType = "staff"; // change to "staff" or "User"(another role) to show generator + scanner
     const showGenerator = userType !== "user";
     const [qrText, setQrText] = useState("");
     const [qrDataUrl, setQrDataUrl] = useState("");
@@ -76,6 +76,8 @@ const QrScanner = ({ onNavigate }) => {
         scannerRef.current = scanner;
     };
 
+    const QR_read_result = scanResult;
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
             <Navbar onNavigate={onNavigate} />
@@ -135,7 +137,7 @@ const QrScanner = ({ onNavigate }) => {
                         <div id={readerId} className="mt-6 rounded-3xl bg-slate-100 p-4 text-slate-900" />
                         <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left text-sm text-slate-700">
                             <p className="font-semibold text-slate-900">Result:</p>
-                            <p className="mt-2 break-words">{scanResult}</p>
+                            <p className="mt-2 break-words">{QR_read_result}</p>
                         </div>
                     </section>
                 </div>
