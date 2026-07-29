@@ -53,14 +53,30 @@ const QrScanner = ({ onNavigate }) => {
         a.click();
     };
 
-    const startScanner = () => {
+    const startScanner = async () => {
         if (scannerRef.current) {
             scannerRef.current.clear().catch(() => null);
+            scannerRef.current = null;
+        }
+
+        try {
+            // Request camera access before starting the QR library so the browser
+            // shows its permission prompt at the camera action.
+            const permissionStream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: { ideal: "environment" } },
+            });
+
+            // html5-qrcode opens its own stream after permission is granted.
+            permissionStream.getTracks().forEach((track) => track.stop());
+        } catch (error) {
+            console.error("Camera permission was not granted.", error);
+            return;
         }
 
         const config = {
             fps: 10,
             qrbox: 250,
+            videoConstraints: { facingMode: { ideal: "environment" } },
         };
 
         const scanner = new Html5QrcodeScanner(readerId, config, false);
