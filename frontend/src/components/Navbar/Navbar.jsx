@@ -71,7 +71,7 @@ const Navbar = ({ onNavigate }) => {
             </div>
 
             {isMenuOpen && (
-                <div className="fixed inset-x-0 top-20 bottom-0 z-40 overflow-auto bg-white px-6 pb-6 pt-6 shadow-lg md:hidden">
+                <div className="fixed inset-x-0 top-full z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl md:hidden">
                     <div className="flex min-h-full flex-col gap-6">
                         <NavLinks
                             links={links}
