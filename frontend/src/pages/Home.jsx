@@ -4,19 +4,15 @@ import Services from "../components/Services/Services";
 import Footer from "../components/Footer/Footer";
 import About from "../components/About/About";
 
-const Home = () => {
-
+const Home = ({ onNavigate }) => {
     return (
-
         <div id="top">
-
-            <Navbar />
+            <Navbar onNavigate={onNavigate} />
             <Hero />
             <Services />
             <About />
             <Footer />
         </div>
-
     );
 };
 
