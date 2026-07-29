@@ -34,6 +34,16 @@ html {
   100% { transform: translateY(-6rem); }
 }
 
+@keyframes scanner-sweep {
+  0%, 100% { transform: translateY(0); opacity: 0.65; }
+  50% { transform: translateY(240px); opacity: 1; }
+}
+
+@keyframes qr-read {
+  0%, 100% { transform: translateY(-54px); opacity: 0.65; }
+  50% { transform: translateY(54px); opacity: 1; }
+}
+
 .hero-brand-panel {
   animation: brand-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -58,6 +68,14 @@ html {
   animation: soft-pulse 2s ease-out infinite;
 }
 
+.scanner-line {
+  animation: scanner-sweep 2.4s ease-in-out infinite;
+}
+
+.qr-artwork-line {
+  animation: qr-read 2s ease-in-out infinite;
+}
+
 .hero-live {
   animation: soft-pulse 2.5s ease-out infinite;
 }
@@ -75,6 +93,14 @@ html {
   .hero-status-dot,
   .hero-live,
   .hero-qr {
+    animation: none;
+  }
+
+  .scanner-line {
+    animation: none;
+  }
+
+  .qr-artwork-line {
     animation: none;
   }
 }

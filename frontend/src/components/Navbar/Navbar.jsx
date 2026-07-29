@@ -11,7 +11,7 @@ const Navbar = ({ onNavigate }) => {
         { label: "Features", href: "#features", page: "home" },
         { label: "About", href: "#about", page: "home" },
         { label: "Contact", href: "#contact", page: "home" },
-        { label: "Qr-scanner", href: "#", page: "qr" },
+        { label: "Scan & Park", href: "#", page: "qr" },
     ];
 
     const scrollToTarget = (hash) => {
