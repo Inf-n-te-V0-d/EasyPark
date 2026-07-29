@@ -8,7 +8,7 @@ const Home = ({ onNavigate }) => {
     return (
         <div id="top">
             <Navbar onNavigate={onNavigate} />
-            <Hero />
+            <Hero onNavigate={onNavigate} />
             <Services />
             <About />
             <Footer />
