@@ -1,3 +1,4 @@
+const { use } = require("react");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
@@ -21,6 +22,42 @@ const getUser = async (req, res) => {
         res.status(200).json(user);
     }catch(error){
         res.status(500).json({message: error.message})
+    }
+}
+
+// ADD a user
+const addUser = async (req, res) => {
+    try{
+        const user = new User(req.body);
+        const savedUser = await user.save();
+        res.status(200).json(savedUser);
+    }catch(error){
+        res.status(400).json({message: error.message})
+    }
+}
+
+// UPDATE a user
+const updateUser = async (req, res) => {
+    try{
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            {...req.body},
+            {new : true, runValidators: true},
+        );
+        if(!user){
+            return res.status(404).json({ message: 'User not found' });
+        }
+    }catch(error){
+        res.status(400).json({message: error.message})
+    }
+}
+
+// DELETE a user
+const deleteUser = async (req, res) => {
+    try{
+        const user = await User.findByIdAndDelete(req.params.id)
+    }catch(error){
+        res.status(400).json({message: error.message})
     }
 }
 
