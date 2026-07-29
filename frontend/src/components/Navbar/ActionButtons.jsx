@@ -1,20 +1,17 @@
-const ActionButtons = () => {
+const ActionButtons = ({ className = "" }) => {
 
     return (
 
-        <div className="flex items-center gap-4">
+        <div className={`flex flex-wrap items-center gap-4 ${className}`}>
 
             <button
-                className="px-5 py-2 rounded-lg border border-emerald-500
-                text-emerald-500 hover:bg-emerald-500 hover:text-white
-                transition-all cursor-pointer"
+                className="w-full rounded-lg border border-emerald-500 px-5 py-2 text-emerald-500 transition-all hover:bg-emerald-500 hover:text-white md:w-auto"
             >
                 Sign Up
             </button>
 
             <button
-                className="px-5 py-2 rounded-lg bg-emerald-500
-                text-white hover:bg-emerald-600 transition-all cursor-pointer"
+                className="w-full rounded-lg bg-emerald-500 px-5 py-2 text-white transition-all hover:bg-emerald-600 md:w-auto"
             >
                 Sign In
             </button>
