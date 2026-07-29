@@ -9,14 +9,14 @@ const ActionButtons = () => {
                 text-emerald-500 hover:bg-emerald-500 hover:text-white
                 transition-all cursor-pointer"
             >
-                Sign In
+                Sign Up
             </button>
 
             <button
                 className="px-5 py-2 rounded-lg bg-emerald-500
                 text-white hover:bg-emerald-600 transition-all cursor-pointer"
             >
-                Get Started
+                Sign In
             </button>
 
         </div>
