@@ -2,7 +2,7 @@
 import { useState } from "react";
 import "./App.css";
 
-// Pages
+// Components
 import Home from "./pages/Home";
 import QrScanner from "./pages/Qr_scanner";
 
