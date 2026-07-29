@@ -46,7 +46,7 @@ const Navbar = ({ onNavigate }) => {
 
                 <div className="hidden md:flex items-center gap-10">
                     <NavLinks links={links} onLinkClick={handleLinkClick} />
-                    <ActionButtons />
+                    <ActionButtons onNavigate={onNavigate} />
                 </div>
 
                 <button
@@ -79,7 +79,7 @@ const Navbar = ({ onNavigate }) => {
                             className="flex flex-col gap-4"
                             onLinkClick={handleLinkClick}
                         />
-                        <ActionButtons className="flex flex-col gap-3" />
+                        <ActionButtons className="flex flex-col gap-3" onNavigate={onNavigate} />
                     </div>
                 </div>
             )}
