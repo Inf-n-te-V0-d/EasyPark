@@ -14,6 +14,16 @@ const Navbar = ({ onNavigate }) => {
         { label: "Qr-scanner", href: "#", page: "qr" },
     ];
 
+    const scrollToTarget = (hash) => {
+        if (!hash) return;
+        const target = document.querySelector(hash);
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            window.location.hash = hash;
+        }
+    };
+
     const handleLinkClick = (link, event) => {
         if (link.page === "qr") {
             event.preventDefault();
@@ -22,7 +32,7 @@ const Navbar = ({ onNavigate }) => {
             event.preventDefault();
             onNavigate?.("home");
             window.setTimeout(() => {
-                window.location.hash = link.href;
+                scrollToTarget(link.href);
             }, 50);
         }
 
