@@ -58,13 +58,19 @@ const Navbar = ({ onNavigate }) => {
                     <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
                     <div className="flex flex-col items-center justify-center gap-1">
                         <span
-                            className={`h-0.5 w-6 bg-current transition-transform ${isMenuOpen ? "translate-y-1 rotate-45" : ""}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${
+                                isMenuOpen ? "translate-y-1.5 rotate-45" : ""
+                            }`}
                         />
                         <span
-                            className={`h-0.5 w-6 bg-current transition-opacity ${isMenuOpen ? "opacity-0" : "opacity-100"}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-opacity duration-200 ${
+                                isMenuOpen ? "opacity-0" : "opacity-100"
+                            }`}
                         />
                         <span
-                            className={`h-0.5 w-6 bg-current transition-transform ${isMenuOpen ? "-translate-y-1 -rotate-45" : ""}`}
+                            className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${
+                                isMenuOpen ? "-translate-y-1.5 -rotate-45" : ""
+                            }`}
                         />
                     </div>
                 </button>
