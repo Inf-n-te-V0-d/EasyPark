@@ -6,7 +6,7 @@ const PinIcon = () => (
   <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="h-5 w-5"><path d="M20 10c0 5.25-8 11-8 11S4 15.25 4 10a8 8 0 1 1 16 0Z" stroke="currentColor" strokeWidth="1.8" /><circle cx="12" cy="10" r="2.5" stroke="currentColor" strokeWidth="1.8" /></svg>
 );
 
-const Hero = () => (
+const Hero = ({ onNavigate }) => (
   <main className="relative isolate min-h-screen overflow-hidden bg-[#F8FAFC] pt-20">
     <div className="absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_76%_8%,rgba(34,197,94,0.17),transparent_27rem)]" />
     <div className="absolute -bottom-40 -left-40 -z-10 h-96 w-96 rounded-full bg-[#DCFCE7] blur-3xl opacity-70" />
@@ -16,7 +16,7 @@ const Hero = () => (
         <h1 className="mt-7 text-4xl font-bold leading-[1.14] tracking-[-0.035em] text-[#0F172A] sm:text-5xl lg:text-6xl">Park with confidence,<span className="block text-[#22C55E]">every single time.</span></h1>
         <p className="mt-6 max-w-xl text-base leading-8 text-[#334155] sm:text-lg">Find available spaces, reserve your spot, and breeze through entry with one simple, intelligent parking experience.</p>
         <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <a href="#features" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#22C55E] px-6 py-3.5 font-semibold text-white shadow-[0_12px_24px_rgba(34,197,94,0.25)] transition hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#BBF7D0]">Find a parking spot <ArrowIcon /></a>
+          <button type="button" onClick={() => onNavigate?.("qr")} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#22C55E] px-6 py-3.5 font-semibold text-white shadow-[0_12px_24px_rgba(34,197,94,0.25)] transition hover:bg-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#BBF7D0]">Find a parking spot <ArrowIcon /></button>
           <a href="#how-it-works" className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-6 py-3.5 font-semibold text-[#334155] transition hover:border-[#22C55E] hover:text-[#16A34A] focus:outline-none focus:ring-4 focus:ring-[#DCFCE7]">How EasyPark works</a>
         </div>
         <div className="mt-11 flex flex-wrap gap-x-8 gap-y-4 border-t border-[#E2E8F0] pt-7">
