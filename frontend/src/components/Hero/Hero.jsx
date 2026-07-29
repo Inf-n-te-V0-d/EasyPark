@@ -8,7 +8,7 @@ const PinIcon = () => (
 
 const Hero = () => (
   <main className="relative isolate min-h-screen overflow-hidden bg-[#F8FAFC] pt-20">
-    <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_76%_8%,rgba(34,197,94,0.17),transparent_27rem)]" />
+    <div className="absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_76%_8%,rgba(34,197,94,0.17),transparent_27rem)]" />
     <div className="absolute -bottom-40 -left-40 -z-10 h-96 w-96 rounded-full bg-[#DCFCE7] blur-3xl opacity-70" />
     <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-14 px-6 py-14 lg:grid-cols-[1.05fr_.95fr] lg:px-10 lg:py-16">
       <div className="max-w-2xl">
@@ -24,7 +24,7 @@ const Hero = () => (
         </div>
       </div>
       <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-        <div className="hero-brand-panel relative overflow-hidden rounded-[24px] bg-[#0F172A] px-7 py-9 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-10 sm:py-12">
+        <div className="hero-brand-panel relative overflow-hidden rounded-3xl bg-[#0F172A] px-7 py-9 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-10 sm:py-12">
           <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#22C55E] opacity-20 blur-3xl" />
           <div className="hero-brand-logo relative mx-auto grid h-32 w-32 place-items-center rounded-[28px] bg-white p-4 shadow-2xl sm:h-40 sm:w-40"><img src="/Logo_icon.png" alt="EasyPark smart parking logo" className="h-full w-full object-contain" /></div>
           <p className="hero-brand-name relative mt-6 text-3xl font-bold tracking-tight sm:text-4xl">Easy<span className="text-[#22C55E]">Park</span></p>

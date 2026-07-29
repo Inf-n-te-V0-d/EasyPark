@@ -35,7 +35,7 @@ const Services = () => (
   <section id="features" className="bg-white py-20 sm:py-24">
     <div className="mx-auto max-w-7xl px-6 lg:px-10">
       <div className="grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr] lg:gap-20">
-        <div id="how-it-works" className="relative overflow-hidden rounded-[24px] bg-[#0F172A] px-6 py-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-9 sm:py-10">
+        <div id="how-it-works" className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-6 py-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-9 sm:py-10">
           <div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-[#22C55E] opacity-20 blur-3xl" />
           <p className="relative text-sm font-semibold uppercase tracking-[0.16em] text-[#86EFAC]">EasyPark in motion</p>
           <h2 className="relative mt-3 text-3xl font-semibold leading-tight sm:text-4xl">Parking, made refreshingly simple.</h2>
