@@ -8,6 +8,7 @@
 html {
   font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
   background: #F8FAFC;
+  scroll-behavior: smooth;
 }
 
 @keyframes brand-enter {
