@@ -1,1 +1,80 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
+
+:root {
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  background: #F8FAFC;
+  scroll-behavior: smooth;
+}
+
+@keyframes brand-enter {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes soft-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.35); }
+  50% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+}
+
+@keyframes phrase-cycle {
+  0%, 26% { transform: translateY(0); }
+  33%, 59% { transform: translateY(-3rem); }
+  66%, 92% { transform: translateY(-6rem); }
+  100% { transform: translateY(-6rem); }
+}
+
+.hero-brand-panel {
+  animation: brand-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-logo-card {
+  animation: brand-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-brand-logo {
+  animation: brand-enter 650ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-brand-name {
+  animation: brand-enter 650ms 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-phrase-track {
+  animation: phrase-cycle 9s ease-in-out 1s infinite;
+}
+
+.hero-status-dot {
+  animation: soft-pulse 2s ease-out infinite;
+}
+
+.hero-live {
+  animation: soft-pulse 2.5s ease-out infinite;
+}
+
+.hero-qr {
+  animation: qr-glow 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-brand-panel,
+  .hero-logo-card,
+  .hero-brand-logo,
+  .hero-brand-name,
+  .hero-phrase-track,
+  .hero-status-dot,
+  .hero-live,
+  .hero-qr {
+    animation: none;
+  }
+}

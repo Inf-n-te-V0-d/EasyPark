@@ -1,29 +1,18 @@
-const NavLinks = () => {
-
-    const links = [
-        "Home",
-        "Features",
-        "About",
-        "Contact"
-    ];
-
+const NavLinks = ({ links = [], mobile = false, className = "", onLinkClick }) => {
     return (
-
-        <ul className="hidden md:flex items-center gap-10">
-
+        <ul className={`${mobile ? "flex flex-col gap-4" : "hidden md:flex items-center gap-10"} ${className}`}>
             {links.map((link) => (
-
-                <li
-                    key={link}
-                    className="cursor-pointer font-medium hover:text-emerald-500 transition duration-300"
-                >
-                    {link}
+                <li key={link.label}>
+                    <a
+                        href={link.href}
+                        className={`font-medium text-[#334155] transition duration-300 hover:text-[#16A34A] ${mobile ? "block py-3 text-lg" : ""}`}
+                        onClick={(event) => onLinkClick?.(link, event)}
+                    >
+                        {link.label}
+                    </a>
                 </li>
-
             ))}
-
         </ul>
-
     );
 };
 

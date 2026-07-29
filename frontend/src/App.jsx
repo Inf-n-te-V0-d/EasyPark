@@ -1,13 +1,15 @@
 // stylesheet
+import { useState } from "react";
 import "./App.css";
 
 // Components
 import Home from "./pages/Home";
+import QrScanner from "./pages/Qr_scanner";
 
 function App() {
+    const [page, setPage] = useState("home");
 
-    return <Home />;
-
+    return page === "qr" ? <QrScanner onNavigate={setPage} /> : <Home onNavigate={setPage} />;
 }
 
 export default App;

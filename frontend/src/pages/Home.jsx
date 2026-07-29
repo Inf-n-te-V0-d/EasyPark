@@ -1,30 +1,18 @@
 import Navbar from "../components/Navbar/Navbar";
+import Hero from "../components/Hero/Hero";
+import Services from "../components/Services/Services";
+import Footer from "../components/Footer/Footer";
+import About from "../components/About/About";
 
-const Home = () => {
-
+const Home = ({ onNavigate }) => {
     return (
-
-        <>
-
-            <Navbar />
-
-            <section
-                className="pt-24 h-screen flex justify-center items-center"
-            >
-
-                <h1 className="text-6xl font-bold">
-
-                    Welcome to
-                    <span className="text-emerald-500">
-                        {" "}EasyPark
-                    </span>
-
-                </h1>
-
-            </section>
-
-        </>
-
+        <div id="top">
+            <Navbar onNavigate={onNavigate} />
+            <Hero />
+            <Services />
+            <About />
+            <Footer />
+        </div>
     );
 };
 
