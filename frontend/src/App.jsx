@@ -5,6 +5,7 @@ import "./App.css";
 // Components
 import Home from "./pages/Home";
 import QrScanner from "./pages/Qr_scanner";
+import Reservation from "./pages/Reservation";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -31,6 +32,10 @@ function App() {
 
     if (page === "qr") {
         return <QrScanner onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+    }
+
+    if (page === "reservation") {
+        return <Reservation onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
     }
 
     if (page === "login") {

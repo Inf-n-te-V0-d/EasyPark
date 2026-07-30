@@ -95,65 +95,90 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const QR_read_result = scanResult;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900">
+        <div className="scan-park-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
-            <main className="mx-auto max-w-7xl px-6 py-24">
-                <div className="mb-10 text-center">
-                    <h1 className="text-4xl font-semibold text-slate-900">QR Tool</h1>
-                    <p className="mt-4 max-w-2xl mx-auto text-slate-600">
-                        Scan your parking QR code from a clean app page that matches the rest of the site.
+            <main className="scan-park-main">
+                <div className="scan-park-hero">
+                    <span className="scan-park-eyebrow"><span className="scan-park-live-dot" /> EasyPark QR Hub</span>
+                    <h1>Scan, park, <span>go.</span></h1>
+                    <p>
+                        Generate a parking QR code or scan one in seconds. Everything you need for a smoother arrival is right here.
                     </p>
                 </div>
 
-                <div className={`grid gap-8 ${showGenerator ? "lg:grid-cols-2" : "justify-items-center"}`}>
+                <div className={`scan-park-grid ${showGenerator ? "scan-park-grid-two" : "scan-park-grid-single"}`}>
                     {showGenerator && (
-                        <section className="rounded-[1.5rem] border border-slate-200 bg-white p-8 shadow-sm">
-                            <h2 className="mb-6 text-2xl font-semibold text-slate-900">QR Code Generator</h2>
+                        <section className="scan-park-card scan-generator-card">
+                            <div className="scan-card-heading">
+                                <span className="scan-card-icon" aria-hidden="true">⌘</span>
+                                <div>
+                                    <span className="scan-card-kicker">Create</span>
+                                    <h2>QR Code Generator</h2>
+                                </div>
+                            </div>
+                            <p className="scan-card-description">Add a link, reference, or parking detail to create a shareable QR code.</p>
                             <input
                                 value={qrText}
                                 onChange={(event) => setQrText(event.target.value)}
                                 placeholder="Enter text or URL"
-                                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-400"
+                                className="scan-park-input"
                             />
-                            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                            <div className="scan-park-actions">
                                 <button
                                     onClick={generateQR}
-                                    className="rounded-2xl bg-emerald-500 px-5 py-3 font-semibold text-white transition hover:bg-emerald-600"
+                                    className="scan-park-button scan-park-button-primary"
                                 >
                                     Generate QR
                                 </button>
                                 <button
                                     onClick={downloadQR}
-                                    className="rounded-2xl bg-slate-200 px-5 py-3 font-semibold text-slate-900 transition hover:bg-slate-300"
+                                    className="scan-park-button scan-park-button-secondary"
                                 >
                                     Download QR
                                 </button>
                             </div>
                             <div
                                 id="qrcode"
-                                className="mt-8 rounded-3xl bg-slate-50 p-6 text-slate-900"
+                                className="scan-park-qr-preview"
                             >
                                 {qrDataUrl ? (
                                     <img src={qrDataUrl} alt="Generated QR code" className="mx-auto" />
                                 ) : (
-                                    <p className="text-center text-slate-500">QR code preview will appear here.</p>
+                                    <div className="scan-park-empty-qr">
+                                        <span aria-hidden="true">⌘</span>
+                                        <p>QR code preview will appear here.</p>
+                                    </div>
                                 )}
                             </div>
                         </section>
                     )}
 
-                    <section className="w-full max-w-xl rounded-[1.5rem] border border-slate-200 bg-white p-8 shadow-sm">
-                        <h2 className="mb-6 text-2xl font-semibold text-slate-900">QR Code Scanner</h2>
+                    <section className="scan-park-card scan-scanner-card">
+                        <div className="scan-card-heading">
+                            <span className="scan-card-icon scan-card-icon-camera" aria-hidden="true">⌁</span>
+                            <div>
+                                <span className="scan-card-kicker">Arrive</span>
+                                <h2>QR Code Scanner</h2>
+                            </div>
+                        </div>
+                        <p className="scan-card-description">Use your device camera to check in at your assigned parking space.</p>
                         <button
                             onClick={startScanner}
-                            className="rounded-2xl bg-emerald-500 px-5 py-3 font-semibold text-white transition hover:bg-emerald-600"
+                            className="scan-park-button scan-park-button-primary scan-camera-button"
                         >
-                            Start Camera
+                            <span aria-hidden="true">◉</span> Start Camera
                         </button>
-                        <div id={readerId} className="mt-6 rounded-3xl bg-slate-100 p-4 text-slate-900" />
-                        <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left text-sm text-slate-700">
-                            <p className="font-semibold text-slate-900">Result:</p>
-                            <p className="mt-2 break-words">{QR_read_result}</p>
+                        <div className="scan-camera-shell">
+                            <div className="scan-camera-corners" aria-hidden="true" />
+                            <div id={readerId} className="scan-reader" />
+                            <p className="scan-camera-hint">Position the QR code inside the frame</p>
+                        </div>
+                        <div className="scan-result" aria-live="polite">
+                            <span className="scan-result-icon" aria-hidden="true">✓</span>
+                            <div>
+                                <p className="scan-result-label">Latest scan</p>
+                                <p className="scan-result-value">{QR_read_result}</p>
+                            </div>
                         </div>
                     </section>
                 </div>
