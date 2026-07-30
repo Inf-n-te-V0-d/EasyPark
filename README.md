@@ -21,17 +21,28 @@
 
 # FRONTEND
 ## Colour Palette
-EasyPark Design System
+EasyPark uses CSS theme tokens. Components should use the active `--color-*`
+tokens so they automatically adapt when light or dark mode changes.
 
-Primary:      #22C55E  
-Primary Hover: #16A34A  
-Dark:         #0F172A  
-Text:         #334155  
-Background:   #F8FAFC  
-White:        #FFFFFF  
-Border:       #E2E8F0  
+| Token                     |Light mode | Dark mode |
+| ---                       |    ---    |    ---    |
+| Primary                   | `#22C55E` | `#22C55E` |
+| Primary hover             | `#16A34A` | `#86EFAC` |
+| Main dark/text heading    | `#0F172A` | `#F8FAFC` |
+| Body text                 | `#334155` | `#CBD5E1` |
+| Page background           | `#F8FAFC` | `#0F172A` |
+| Surface / white           | `#FFFFFF` | `#1E293B` |
+| Border                    | `#E2E8F0` | `#334155` |
+| Decorative glow           | `#DCFCE7` | `#166534` |
 
-Font: Poppins  
+Additional 
+light-mode tokens: brand tagline `#CBD5E1`,
+muted white`rgba(255, 255, 255, 0.8)`,
+ footer muted `#94A3B8`,
+  footer subtle `#64748B`,
+and footer action hover `#F0FDF4`.
+
+Font: `Poppins`, `ui-sans-serif`, `system-ui`, `sans-serif`  
 Theme: Modern SaaS  
 Border Radius: 12px  
 
