@@ -4,7 +4,7 @@ import QRCode from "qrcode";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
-const QrScanner = ({ onNavigate }) => {
+const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const userType = "staff"; // change to "staff" or "User"(another role) to show generator + scanner
     const showGenerator = userType !== "user";
     const [qrText, setQrText] = useState("");
@@ -96,7 +96,7 @@ const QrScanner = ({ onNavigate }) => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900">
-            <Navbar onNavigate={onNavigate} />
+            <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <main className="mx-auto max-w-7xl px-6 py-24">
                 <div className="mb-10 text-center">
                     <h1 className="text-4xl font-semibold text-slate-900">QR Tool</h1>

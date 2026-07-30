@@ -9,7 +9,7 @@ const PinIcon = () => (
 const Hero = ({ onNavigate }) => (
   <main className="relative isolate min-h-screen overflow-hidden bg-[#F8FAFC] pt-20">
     <div className="absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_76%_8%,rgba(34,197,94,0.17),transparent_27rem)]" />
-    <div className="absolute -bottom-40 -left-40 -z-10 h-96 w-96 rounded-full bg-[#DCFCE7] blur-3xl opacity-70" />
+    <div className="hero-theme-orb absolute -bottom-40 -left-40 -z-10 h-96 w-96 rounded-full bg-[#DCFCE7] blur-3xl opacity-70" />
     <section className="mx-auto grid min-h-[calc(100vh-5rem)] max-w-7xl items-center gap-14 px-6 py-14 lg:grid-cols-[1.05fr_.95fr] lg:px-10 lg:py-16">
       <div className="max-w-2xl">
         <div className="inline-flex items-center gap-2 rounded-full border border-[#BBF7D0] bg-white px-3.5 py-2 text-sm font-medium text-[#16A34A] shadow-sm"><span className="grid h-5 w-5 place-items-center rounded-full bg-[#DCFCE7]"><PinIcon /></span>Smarter parking starts here</div>
@@ -28,7 +28,7 @@ const Hero = ({ onNavigate }) => (
           <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#22C55E] opacity-20 blur-3xl" />
           <div className="hero-brand-logo relative mx-auto grid h-32 w-32 place-items-center rounded-[28px] bg-white p-4 shadow-2xl sm:h-40 sm:w-40"><img src="/Logo_icon.png" alt="EasyPark smart parking logo" className="h-full w-full object-contain" /></div>
           <p className="hero-brand-name relative mt-6 text-3xl font-bold tracking-tight sm:text-4xl">Easy<span className="text-[#22C55E]">Park</span></p>
-          <p className="relative mt-2 text-sm text-slate-300 sm:text-base">Parking, tracked the easy way.</p>
+          <p className="hero-brand-tagline relative mt-2 text-sm text-slate-300 sm:text-base">Parking, tracked the easy way.</p>
           <div className="relative mt-8 h-12 overflow-hidden rounded-xl border border-white/15 bg-white/10 px-4">
             <div className="hero-phrase-track">
               <p>Track your parking in real time</p>
