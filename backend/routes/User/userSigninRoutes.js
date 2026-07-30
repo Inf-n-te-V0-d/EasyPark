@@ -1,15 +1,11 @@
 const express = require("express");
 const {
-  getUser,
-  getUserByIdentifier,
-} = require("../../controllers/userController");
+  signin
+} = require("../../controllers/authenticationController");
 
 const router = express.Router();
 
-// GET a user by ID
-router.get("/:id", getUser);
 
-// GET a user BY identifier
-router.post("/find", getUserByIdentifier);
+router.post("/", signin);
 
 module.exports = router;
