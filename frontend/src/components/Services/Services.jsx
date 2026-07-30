@@ -32,7 +32,8 @@ const services = [
 ];
 
 const Services = () => (
-  <section id="features" className="bg-white py-20 sm:py-24">
+  <section id="features" className="relative overflow-hidden bg-white py-20 sm:py-24">
+    <div className="feature-theme-orb pointer-events-none absolute -top-40 -left-40 h-96 w-96 rounded-full bg-[#DCFCE7] blur-3xl opacity-70" aria-hidden="true" />
     <div className="mx-auto max-w-7xl px-6 lg:px-10">
       <div className="grid items-center gap-12 lg:grid-cols-[.9fr_1.1fr] lg:gap-20">
         <div id="how-it-works" className="relative overflow-hidden rounded-3xl bg-[#0F172A] px-6 py-8 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-9 sm:py-10">
