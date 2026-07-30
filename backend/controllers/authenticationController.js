@@ -9,9 +9,7 @@ const signup = async (req, res) => {
       !name ||
       !email ||
       !password ||
-      !telephone ||
-      !vehicleDetails?.prefix ||
-      !vehicleDetails?.suffix
+      !telephone
     ) {
       return res
         .status(400)

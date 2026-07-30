@@ -27,13 +27,13 @@ const userSchema = new mongoose.Schema(
     vehicleDetails: {
       prefix: {
         type: String,
-        required: true,
+        //required: true,
         trim: true,
         uppercase: true,
       },
       suffix: {
         type: String,
-        required: true,
+        //required: true,
       },
     },
     role: {
