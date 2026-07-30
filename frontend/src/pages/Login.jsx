@@ -80,8 +80,8 @@ export default function Login({ onNavigate }) {
       <main className="flex-1 grid lg:grid-cols-[.94fr_1.06fr]">
         {/* Left Section */}
         <section className="mx-auto flex w-[min(100%-42px,460px)] flex-col justify-center py-8 lg:w-[min(100%-80px,460px)]">
-          <button type="button" onClick={() => onNavigate?.("home")} className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#475569] transition hover:text-[#16A34A]"><Icon className="h-4 w-4"><path d="m14 6-6 6 6 6M8 12h10" /></Icon>Back to home</button>
-          <div className="mt-7 flex items-center gap-3"><img src="/Logo_icon.png" alt="EasyPark" className="h-11 w-11 rounded-xl object-cover" /><h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Easy<span className="text-[#22C55E]">Park</span></h1></div>
+          <button type="button" onClick={() => onNavigate?.("home")} className="auth-back-link inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#475569] transition hover:text-[#16A34A]"><Icon className="h-4 w-4"><path d="m14 6-6 6 6 6M8 12h10" /></Icon>Back to home</button>
+          <div className="auth-brand-logo mt-7 flex items-center gap-3"><img src="/Logo_icon.png" alt="EasyPark" className="h-11 w-11 rounded-xl object-cover" /><h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Easy<span className="text-[#22C55E]">Park</span></h1></div>
 
           <div className="relative mt-9 rounded-[18px] border border-slate-200 bg-white px-6 py-8 shadow-[0_18px_42px_rgba(15,23,42,.055)] sm:px-[34px] before:absolute before:top-0 before:left-8 before:h-[3px] before:w-12 before:rounded-b-lg before:bg-green-500 before:content-['']">
             <div className="mb-7">

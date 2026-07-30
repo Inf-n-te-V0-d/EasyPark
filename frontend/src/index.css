@@ -3,12 +3,239 @@
 
 :root {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  /* Light-mode design tokens */
+  --light-primary: #22C55E;
+  --light-primary-hover: #16A34A;
+  --light-dark: #0F172A;
+  --light-text: #334155;
+  --light-background: #F8FAFC;
+  --light-white: #FFFFFF;
+  --light-border: #E2E8F0;
+  --light-brand-tagline: #CBD5E1;
+  --light-footer-muted: #94A3B8;
+  --light-footer-subtle: #64748B;
+  --light-footer-action-hover: #F0FDF4;
+
+  /* Dark-mode design tokens */
+  --darkmode-primary: #22C55E;
+  --darkmode-primary-hover: #86EFAC;
+  --darkmode-dark: #F8FAFC;
+  --darkmode-text: #CBD5E1;
+  --darkmode-background: #0F172A;
+  --darkmode-white: #1E293B;
+  --darkmode-border: #334155;
+  --darkmode-glow: #166534;
+
+  /* Active tokens — use these throughout components. */
+  --color-primary: var(--light-primary);
+  --color-primary-hover: var(--light-primary-hover);
+  --color-dark: var(--light-dark);
+  --color-text: var(--light-text);
+  --color-background: var(--light-background);
+  --color-white: var(--light-white);
+  --color-border: var(--light-border);
 }
 
 html {
   font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
-  background: #F8FAFC;
+  background: var(--color-background);
   scroll-behavior: smooth;
+}
+
+html,
+body,
+#root,
+.site-navbar,
+.mobile-nav,
+.theme-toggle,
+.menu-toggle {
+  transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+
+/* Applied only while changing theme, so normal hover and movement transitions
+   continue to use their component-specific timing. */
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke !important;
+  transition-duration: 240ms !important;
+  transition-timing-function: ease-in-out !important;
+}
+
+html.dark {
+  --color-primary: var(--darkmode-primary);
+  --color-primary-hover: var(--darkmode-primary-hover);
+  --color-dark: var(--darkmode-dark);
+  --color-text: var(--darkmode-text);
+  --color-background: var(--darkmode-background);
+  --color-white: var(--darkmode-white);
+  --color-border: var(--darkmode-border);
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+html.dark .site-navbar,
+html.dark .mobile-nav {
+  background-color: color-mix(in srgb, var(--color-background) 92%, transparent);
+  border-color: var(--color-border);
+}
+
+html.dark .site-navbar a,
+html.dark .site-navbar .theme-toggle,
+html.dark .site-navbar .menu-toggle {
+  color: var(--color-dark);
+}
+
+html.dark .theme-toggle,
+html.dark .menu-toggle {
+  border-color: var(--color-border);
+  background-color: var(--color-white);
+}
+
+html.dark .theme-toggle:hover,
+html.dark .menu-toggle:hover {
+  background-color: var(--color-border);
+  border-color: var(--color-primary-hover);
+}
+
+/* Keep the landing page readable when the navigation theme is switched. */
+html.dark #top > main,
+html.dark #features,
+html.dark #about {
+  background-color: var(--color-background) !important;
+}
+
+html.dark #top [class*="bg-white"],
+html.dark #top [class*="bg-[#F8FAFC]"] {
+  background-color: var(--color-white) !important;
+}
+
+html.dark #top [class*="border-[#E2E8F0]"],
+html.dark #top [class*="border-slate-200"] {
+  border-color: var(--color-border) !important;
+}
+
+html.dark #top [class*="text-[#0F172A]"],
+html.dark #top [class*="text-slate-900"] {
+  color: var(--color-dark) !important;
+}
+
+html.dark #top [class*="text-[#334155]"],
+html.dark #top [class*="text-[#475569]"],
+html.dark #top [class*="text-[#64748B]"] {
+  color: var(--color-text) !important;
+}
+
+/* The hero brand card keeps its deliberate brand colours in both themes. */
+html.dark .hero-brand-panel {
+  background-color: var(--light-dark) !important;
+  color: var(--light-white) !important;
+}
+
+html.dark .hero-brand-logo {
+  background-color: var(--light-white) !important;
+}
+
+html.dark .hero-brand-name {
+  color: var(--light-white) !important;
+}
+
+html.dark .hero-brand-name span {
+  color: var(--light-primary) !important;
+}
+
+html.dark .hero-brand-tagline {
+  color: var(--light-brand-tagline) !important;
+}
+
+html.dark .hero-theme-orb {
+  background-color: var(--darkmode-glow) !important;
+  opacity: 0.65;
+}
+
+html.dark .auth-back-link {
+  color: var(--darkmode-text) !important;
+}
+
+html.dark .auth-back-link:hover {
+  color: var(--darkmode-primary-hover) !important;
+}
+
+/* Footer and the dark feature card are already intentional dark brand areas.
+   Their original colours should not be remapped by the page theme. */
+html.dark #contact {
+  background-color: var(--light-dark) !important;
+  color: var(--light-white) !important;
+}
+
+html.dark #contact [class~="text-slate-400"] {
+  color: var(--light-footer-muted) !important;
+}
+
+html.dark #contact [class~="text-slate-500"] {
+  color: var(--light-footer-subtle) !important;
+}
+
+html.dark #contact a[class~="bg-white"] {
+  background-color: var(--light-white) !important;
+  color: var(--light-primary-hover) !important;
+}
+
+html.dark #contact a[class~="bg-white"]:hover {
+  background-color: var(--light-footer-action-hover) !important;
+}
+
+html.dark #how-it-works {
+  background-color: var(--light-dark) !important;
+  color: var(--light-white) !important;
+}
+
+html.dark #how-it-works h2 {
+  color: var(--light-white) !important;
+}
+
+html.dark #how-it-works [class~="text-slate-300"] {
+  color: var(--light-brand-tagline) !important;
+}
+
+/* Authentication and QR pages use Tailwind utility colours rather than the
+   landing-page sections above, so give those shared utilities dark values. */
+html.dark [class~="bg-slate-50"] {
+  background-color: var(--color-background) !important;
+}
+
+html.dark [class~="bg-slate-100"],
+html.dark [class~="bg-slate-200"],
+html.dark [class~="bg-white"] {
+  background-color: var(--color-white) !important;
+}
+
+html.dark [class~="border-slate-200"] {
+  border-color: var(--color-border) !important;
+}
+
+html.dark [class~="text-slate-900"] {
+  color: var(--color-dark) !important;
+}
+
+html.dark [class~="text-slate-700"],
+html.dark [class~="text-slate-600"],
+html.dark [class~="text-slate-500"] {
+  color: var(--color-text) !important;
+}
+
+html.dark input {
+  background-color: var(--color-white) !important;
+  color: var(--color-dark) !important;
+}
+
+/* Must remain the light-theme brand treatment on authentication pages. */
+html.dark .auth-brand-logo h1 {
+  color: var(--light-dark) !important;
+}
+
+html.dark .auth-brand-logo h1 span {
+  color: var(--light-primary) !important;
 }
 
 @keyframes brand-enter {
@@ -85,6 +312,12 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html.theme-transitioning *,
+  html.theme-transitioning *::before,
+  html.theme-transitioning *::after {
+    transition-duration: 0ms !important;
+  }
+
   .hero-brand-panel,
   .hero-logo-card,
   .hero-brand-logo,

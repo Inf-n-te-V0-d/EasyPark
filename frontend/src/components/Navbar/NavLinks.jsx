@@ -5,7 +5,7 @@ const NavLinks = ({ links = [], mobile = false, className = "", onLinkClick }) =
                 <li key={link.label}>
                     <a
                         href={link.href}
-                        className={`font-medium text-[#334155] transition duration-300 hover:text-[#16A34A] ${mobile ? "block py-3 text-lg" : ""}`}
+                        className={`font-medium text-[var(--color-text)] transition duration-300 hover:text-[var(--color-primary-hover)] ${mobile ? "block py-3 text-lg" : ""}`}
                         onClick={(event) => onLinkClick?.(link, event)}
                     >
                         {link.label}

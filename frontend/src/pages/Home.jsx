@@ -4,10 +4,10 @@ import Services from "../components/Services/Services";
 import Footer from "../components/Footer/Footer";
 import About from "../components/About/About";
 
-const Home = ({ onNavigate }) => {
+const Home = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     return (
         <div id="top">
-            <Navbar onNavigate={onNavigate} />
+            <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <Hero onNavigate={onNavigate} />
             <Services />
             <About />

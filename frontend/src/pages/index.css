@@ -13,7 +13,7 @@ body {
   margin: 0;
   min-width: 320px;
   color: #334155;
-  background: #F8FAFC;
+  background: var(--color-background);
   font-family: 'Poppins', sans-serif;
 }
 
