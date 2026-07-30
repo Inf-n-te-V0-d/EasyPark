@@ -93,6 +93,9 @@ html.dark .menu-toggle {
   border-color: var(--color-border);
   background-color: var(--color-white);
 }
+#contact{
+  border-top:1px rgba(255, 255, 255, 0.39) solid;
+}
 
 html.dark .theme-toggle:hover,
 html.dark .menu-toggle:hover {
