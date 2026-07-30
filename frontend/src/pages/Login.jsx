@@ -81,7 +81,7 @@ export default function Login({ onNavigate }) {
         {/* Left Section */}
         <section className="mx-auto flex w-[min(100%-42px,460px)] flex-col justify-center py-8 lg:w-[min(100%-80px,460px)]">
           <button type="button" onClick={() => onNavigate?.("home")} className="auth-back-link inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#475569] transition hover:text-[#16A34A]"><Icon className="h-4 w-4"><path d="m14 6-6 6 6 6M8 12h10" /></Icon>Back to home</button>
-          <div className="auth-brand-logo mt-7 flex items-center gap-3"><img src="/Logo_icon.png" alt="EasyPark" className="h-11 w-11 rounded-xl object-cover" /><h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Easy<span className="text-[#22C55E]">Park</span></h1></div>
+          <div className="auth-brand-logo-log-reg mt-7 flex items-center gap-3"><img src="/Logo_icon.png" alt="EasyPark" className="h-11 w-11 rounded-xl object-cover" /><h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Easy<span className="text-[#22C55E]">Park</span></h1></div>
 
           <div className="relative mt-9 rounded-[18px] border border-slate-200 bg-white px-6 py-8 shadow-[0_18px_42px_rgba(15,23,42,.055)] sm:px-[34px] before:absolute before:top-0 before:left-8 before:h-[3px] before:w-12 before:rounded-b-lg before:bg-green-500 before:content-['']">
             <div className="mb-7">
@@ -213,10 +213,10 @@ export default function Login({ onNavigate }) {
         </section>
 
         {/* Right Section */}
-        <aside className="relative hidden min-h-screen overflow-hidden bg-[#0F172A] lg:block">
+        <aside className="auth-visual-panel relative hidden min-h-screen overflow-hidden bg-[#0F172A] lg:block">
           <img src="/Login_img.png" alt="EasyPark parking experience" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/90 via-[#0F172A]/25 to-[#0F172A]/25" />
-          <div className="absolute inset-x-12 bottom-12 text-white"><span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-xs font-semibold backdrop-blur"><CheckIcon /> Smarter parking</span><h2 className="mt-5 text-4xl font-bold tracking-tight">Your space is<br />waiting for you.</h2><p className="mt-3 max-w-sm text-sm leading-6 text-white/80">Find, reserve, track, and manage your parking in just a few taps.</p></div>
+          <div className="auth-visual-content absolute inset-x-12 bottom-12 text-white"><span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-xs font-semibold backdrop-blur"><CheckIcon /> Smarter parking</span><h2 className="mt-5 text-4xl font-bold tracking-tight">Your space is<br />waiting for you.</h2><p className="auth-visual-copy mt-3 max-w-sm text-sm leading-6 text-white/80">Find, reserve, track, and manage your parking in just a few taps.</p></div>
         </aside>
       </main>
 
