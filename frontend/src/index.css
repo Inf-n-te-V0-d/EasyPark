@@ -163,6 +163,11 @@ html.dark .hero-theme-orb {
   opacity: 0.65;
 }
 
+html.dark .feature-theme-orb {
+  background-color: var(--darkmode-glow) !important;
+  opacity: 0.65;
+}
+
 html.dark .auth-back-link {
   color: var(--darkmode-text) !important;
 }
