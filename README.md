@@ -10,6 +10,7 @@
 ### 4. npm install dotenv
 ### 5. npm install nodemon
 ### 6. npm install cors
+### 7. npm install bcrypt
 
 
 ## Then create .env file inside backend folder
