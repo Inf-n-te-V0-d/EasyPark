@@ -51,7 +51,43 @@ const signup = async (req, res) => {
 };
 
 const signin = async (req, res) => {
-    
+    try{
+        const {identifier, password} = req.body;
+
+        if(!identifier || !password){
+            return res.status(400).json({message: "Email/telephone and password are required."});
+        }
+
+        // Find by email or telephone
+        const user = await User.findOne({
+            $or: [
+                {email: identifier},
+                {telephone: identifier},
+            ]
+        })
+        if(!user){
+            return res.staus(401).json({message: "Invalid Credentials."})
+        }
+
+        const passwordMatch = await bcrypt.compare(
+            password,
+            user.password
+        )
+        if(!passwordMatch){
+            return res.status(401).json({
+                message: "Invalid Password."
+            })
+        }
+
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        res.status(200).json({
+            message: "Signin Successful.",
+            user: userResponse
+        });
+    }catch(error){
+        res.status(500).json({message: error.message});
+    }
 }
 
 
