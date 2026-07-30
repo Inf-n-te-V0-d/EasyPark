@@ -103,6 +103,11 @@ html.dark .menu-toggle:hover {
   border-color: var(--color-primary-hover);
 }
 
+.site-navbar .nav-link:hover,
+.mobile-nav .nav-link:hover {
+  color: var(--color-primary) !important;
+}
+
 /* Keep the landing page readable when the navigation theme is switched. */
 html.dark #top > main,
 html.dark #features,
@@ -190,6 +195,11 @@ html.dark #contact a[class~="bg-white"]:hover {
   background-color: var(--light-footer-action-hover) !important;
 }
 
+html.dark #contact a[href="#privacy"]:hover,
+html.dark #contact a[href="#terms"]:hover {
+  color: var(--color-primary) !important;
+}
+
 html.dark #how-it-works {
   background-color: var(--light-dark) !important;
   color: var(--light-white) !important;
@@ -260,6 +270,11 @@ html.dark .auth-visual-content h2 {
 html.dark .auth-visual-copy {
   color: var(--light-white-muted) !important;
 }
+
+.mobile-nav-link {
+  border-bottom: 1px solid var(--color-border);
+}
+
 
 /* Scan & Park ------------------------------------------------------------- */
 .scan-park-page {

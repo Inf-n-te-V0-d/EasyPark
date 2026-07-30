@@ -45,13 +45,13 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
                 <Logo />
 
-                <div className="hidden min-[1090px]:flex items-center gap-10">
+                <div className="hidden min-[1220px]:flex items-center gap-10">
                     <NavLinks links={links} onLinkClick={handleLinkClick} />
                     <ActionButtons onNavigate={onNavigate} />
                     <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                 </div>
 
-                <div className="flex items-center gap-2 min-[1090px]:hidden">
+                <div className="flex items-center gap-2 min-[1220px]:hidden">
                     <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                     <button
                         type="button"
@@ -70,7 +70,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             </div>
 
             <div
-                className={`mobile-nav fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl min-[1090px]:hidden transition-all duration-300 ease-in-out ${
+                className={`mobile-nav fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl min-[1220px]:hidden transition-all duration-300 ease-in-out ${
                     isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
                 }`}
                 style={{ visibility: isMenuOpen ? "visible" : "hidden" }}
@@ -79,7 +79,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     <NavLinks
                         links={links}
                         mobile
-                        className="flex flex-col gap-4"
+                        className="flex flex-col items-center gap-4 text-center"
                         onLinkClick={handleLinkClick}
                     />
                     <ActionButtons className="flex flex-col gap-3" onNavigate={onNavigate} />
