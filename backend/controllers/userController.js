@@ -13,8 +13,12 @@ const getUsers = async (req, res) => {
 
 // GET a single user
 const getUser = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid User ID" });
+  }
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
@@ -53,7 +57,7 @@ const addUser = async (req, res) => {
   try {
     const user = new User(req.body);
     const savedUser = await user.save();
-    res.status(200).json(savedUser);
+    res.status(201).json(savedUser);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -61,9 +65,13 @@ const addUser = async (req, res) => {
 
 // UPDATE a user
 const updateUser = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ message: "No Such ID found." });
+  }
   try {
     const user = await User.findByIdAndUpdate(
-      req.params.id,
+      id,
       { ...req.body },
       { new: true, runValidators: true },
     );
@@ -72,20 +80,24 @@ const updateUser = async (req, res) => {
     }
     res.status(200).json(user);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // DELETE a user
 const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ message: "No Such ID found." });
+  }
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByIdAndDelete(id);
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
