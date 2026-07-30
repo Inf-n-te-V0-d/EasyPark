@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
@@ -11,6 +11,14 @@ const spaces = [
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [selectedSpace, setSelectedSpace] = useState("A-01");
     const [isReserved, setIsReserved] = useState(false);
+
+    useEffect(() => {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth", // Use "auto" if you don't want animation
+        });
+    }, []);
 
     const chooseSpace = (space) => {
         if (space.status === "occupied") return;
