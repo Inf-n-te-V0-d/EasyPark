@@ -10,11 +10,13 @@
   --light-text: #334155;
   --light-background: #F8FAFC;
   --light-white: #FFFFFF;
+  --light-white-muted: rgba(255, 255, 255, 0.8);
   --light-border: #E2E8F0;
   --light-brand-tagline: #CBD5E1;
   --light-footer-muted: #94A3B8;
   --light-footer-subtle: #64748B;
   --light-footer-action-hover: #F0FDF4;
+  --light-dark-log-reg:#FFFFFF;
 
   /* Dark-mode design tokens */
   --darkmode-primary: #22C55E;
@@ -234,8 +236,26 @@ html.dark .auth-brand-logo h1 {
   color: var(--light-dark) !important;
 }
 
+html.dark .auth-brand-logo-log-reg h1 {
+  color: var(--light-dark-log-reg) !important;
+}
+
 html.dark .auth-brand-logo h1 span {
   color: var(--light-primary) !important;
+}
+
+/* Login/Register visual panels keep their intentional dark marketing style. */
+html.dark .auth-visual-panel {
+  background-color: var(--light-dark) !important;
+}
+
+html.dark .auth-visual-content,
+html.dark .auth-visual-content h2 {
+  color: var(--light-white) !important;
+}
+
+html.dark .auth-visual-copy {
+  color: var(--light-white-muted) !important;
 }
 
 @keyframes brand-enter {
