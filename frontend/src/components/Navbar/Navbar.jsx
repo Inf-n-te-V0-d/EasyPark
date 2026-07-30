@@ -11,6 +11,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         { label: "Features", href: "#features", page: "home" },
         { label: "About", href: "#about", page: "home" },
         { label: "Contact", href: "#contact", page: "home" },
+        { label: "Reservation", href: "#", page: "reservation" },
         { label: "Scan & Park", href: "#", page: "qr" },
     ];
 
@@ -25,9 +26,9 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     };
 
     const handleLinkClick = (link, event) => {
-        if (link.page === "qr") {
+        if (link.page === "qr" || link.page === "reservation") {
             event.preventDefault();
-            onNavigate?.("qr");
+            onNavigate?.(link.page);
         } else if (link.href?.startsWith("#")) {
             event.preventDefault();
             onNavigate?.("home");
