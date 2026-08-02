@@ -11,7 +11,7 @@ const Home = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             <Hero onNavigate={onNavigate} />
             <Services />
             <About />
-            <Footer />
+            <Footer onNavigate={onNavigate} />
         </div>
     );
 };
