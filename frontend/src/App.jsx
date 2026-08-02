@@ -8,9 +8,19 @@ import QrScanner from "./pages/Qr_scanner";
 import Reservation from "./pages/Reservation";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 
 function App() {
-    const [page, setPage] = useState("home");
+    const [page, setPage] = useState(() => {
+        const hash = window.location.hash.replace("#", "").trim();
+        if (hash === "privacy" || hash === "terms") {
+            return hash;
+        }
+
+        return "home";
+    });
+
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem("easypark-theme") === "dark";
     });
@@ -30,6 +40,23 @@ function App() {
         return () => window.clearTimeout(transitionTimer);
     }, [isDarkMode]);
 
+    useEffect(() => {
+        const syncPageFromHash = () => {
+            const hash = window.location.hash.replace("#", "").trim();
+
+            if (hash === "privacy" || hash === "terms") {
+                setPage(hash);
+            } else if (hash === "home" || !hash || hash === "top") {
+                setPage("home");
+            }
+        };
+
+        syncPageFromHash();
+        window.addEventListener("hashchange", syncPageFromHash);
+
+        return () => window.removeEventListener("hashchange", syncPageFromHash);
+    }, []);
+
     if (page === "qr") {
         return <QrScanner onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
     }
@@ -44,6 +71,14 @@ function App() {
 
     if (page === "register") {
         return <Register onNavigate={setPage} />;
+    }
+
+    if (page === "privacy") {
+        return <Privacy onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+    }
+
+    if (page === "terms") {
+        return <Terms onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
     }
 
     return <Home onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
