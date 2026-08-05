@@ -16,7 +16,7 @@
 ## Then create .env file inside backend folder
 ### inside that file create local environment variables 
 ### 1. MONGO_LOCAL=your mongo db url
-### 2. PORT=4000
+### 2. PORT=port name
 
 
 # FRONTEND
