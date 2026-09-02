@@ -183,7 +183,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     </section>
                 </div>
             </main>
-            <Footer />
+            <Footer onNavigate={onNavigate} />
         </div>
     );
 };
