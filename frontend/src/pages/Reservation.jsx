@@ -28,8 +28,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     return (
         <div className="reservation-page min-h-screen">
-            <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
-            <main className="reservation-main">
+                        <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
+                        <main className="reservation-main">
                 <header className="reservation-hero">
                     <span className="reservation-eyebrow">Reserve your space</span>
                     <h1>Your parking spot, <span>saved ahead.</span></h1>
@@ -65,8 +65,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
                     </aside>
                 </div>
-            </main>
-            <Footer onNavigate={onNavigate} />
+              </main>
+              <Footer onNavigate={onNavigate} />
+            </div>
         </div>
     );
 };
