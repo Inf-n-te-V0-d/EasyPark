@@ -10,6 +10,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import Loader from "./components/Loader/Loader";
 
 function App() {
     const [page, setPage] = useState(() => {
@@ -24,6 +25,8 @@ function App() {
     const [isDarkMode, setIsDarkMode] = useState(() => {
         return localStorage.getItem("easypark-theme") === "dark";
     });
+
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -68,31 +71,80 @@ function App() {
         return () => window.removeEventListener("hashchange", syncPageFromHash);
     }, []);
 
+    // Show a short loader on first mount / refresh
+    useEffect(() => {
+        const t = setTimeout(() => setIsLoading(false), 700);
+        return () => clearTimeout(t);
+    }, []);
+
+    // Wrapped navigation so loader shows during transitions but doesn't block routing
+    const handleNavigate = (to) => {
+        setIsLoading(true);
+        setPage(to);
+        // let content change immediately, hide loader shortly after
+        setTimeout(() => setIsLoading(false), 700);
+    };
+
     if (page === "qr") {
-        return <QrScanner onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <QrScanner onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
     }
 
     if (page === "reservation") {
-        return <Reservation onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Reservation onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
     }
 
     if (page === "login") {
-        return <Login onNavigate={setPage} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Login onNavigate={handleNavigate} />
+            </>
+        );
     }
 
     if (page === "register") {
-        return <Register onNavigate={setPage} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Register onNavigate={handleNavigate} />
+            </>
+        );
     }
 
     if (page === "privacy") {
-        return <Privacy onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Privacy onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
     }
 
     if (page === "terms") {
-        return <Terms onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Terms onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
     }
 
-    return <Home onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+    return (
+        <>
+            {isLoading && <Loader duration={700} />}
+            <Home onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+        </>
+    );
 }
 
 export default App;
