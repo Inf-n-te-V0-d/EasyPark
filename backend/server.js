@@ -6,9 +6,13 @@ const cors = require("cors");
 const app = express();
 
 // routers
+// USER routes
 const userRouter = require("./routes/user/userRoutes")
 const userSignInRouter = require("./routes/user/userSigninRoutes");
 const userSignUpRouter = require("./routes/user/userSignupRoutes");
+
+// RESERVATION routes
+const reservationRouter = require("./routes/reservation/reservationRoutes");
 
 // middleware
 app.use(cors());
@@ -25,6 +29,7 @@ app.use((req, res, next) => {
 app.use("/users", userRouter);
 app.use("/signin", userSignInRouter);
 app.use("/signup", userSignUpRouter);
+app.use("/reservation", reservationRouter);
 
 
 
