@@ -1,122 +1,150 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// stylesheet
+import { useEffect, useState } from "react";
+import "./App.css";
+
+// Components
+import Home from "./pages/Home";
+import QrScanner from "./pages/Qr_scanner";
+import Reservation from "./pages/Reservation";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Loader from "./components/Loader/Loader";
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [page, setPage] = useState(() => {
+        const hash = window.location.hash.replace("#", "").trim();
+        if (hash === "privacy" || hash === "terms") {
+            return hash;
+        }
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        return "home";
+    });
 
-      <div className="ticks"></div>
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        return localStorage.getItem("easypark-theme") === "dark";
+    });
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+    const [isLoading, setIsLoading] = useState(true);
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    useEffect(() => {
+        const root = document.documentElement;
+
+        // apply class
+        if (isDarkMode) {
+            root.classList.add("dark");
+        } else {
+            root.classList.remove("dark");
+        }
+
+        // persist
+        try {
+            localStorage.setItem("easypark-theme", isDarkMode ? "dark" : "light");
+        } catch (err) {
+            // ignore
+        }
+
+        // add transition class briefly for smooth change
+        root.classList.add("theme-transitioning");
+        const transitionTimer = window.setTimeout(() => {
+            root.classList.remove("theme-transitioning");
+        }, 280);
+
+        return () => window.clearTimeout(transitionTimer);
+    }, [isDarkMode]);
+
+    useEffect(() => {
+        const syncPageFromHash = () => {
+            const hash = window.location.hash.replace("#", "").trim();
+
+            if (hash === "privacy" || hash === "terms") {
+                setPage(hash);
+            } else if (hash === "home" || hash === "top") {
+                setPage("home");
+            }
+        };
+
+        syncPageFromHash();
+        window.addEventListener("hashchange", syncPageFromHash);
+
+        return () => window.removeEventListener("hashchange", syncPageFromHash);
+    }, []);
+
+    // Show a short loader on first mount / refresh
+    useEffect(() => {
+        const t = setTimeout(() => setIsLoading(false), 700);
+        return () => clearTimeout(t);
+    }, []);
+
+    // Wrapped navigation so loader shows during transitions but doesn't block routing
+    const handleNavigate = (to) => {
+        setIsLoading(true);
+        setPage(to);
+        // let content change immediately, hide loader shortly after
+        setTimeout(() => setIsLoading(false), 700);
+    };
+
+    if (page === "qr") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <QrScanner onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
+    }
+
+    if (page === "reservation") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Reservation onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
+    }
+
+    if (page === "login") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Login onNavigate={handleNavigate} />
+            </>
+        );
+    }
+
+    if (page === "register") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Register onNavigate={handleNavigate} />
+            </>
+        );
+    }
+
+    if (page === "privacy") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Privacy onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
+    }
+
+    if (page === "terms") {
+        return (
+            <>
+                {isLoading && <Loader duration={700} />}
+                <Terms onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+            </>
+        );
+    }
+
+    return (
+        <>
+            {isLoading && <Loader duration={700} />}
+            <Home onNavigate={handleNavigate} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />
+        </>
+    );
 }
 
-export default App
+export default App;

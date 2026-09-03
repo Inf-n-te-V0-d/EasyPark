@@ -1,0 +1,105 @@
+import { useState } from "react";
+import Logo from "./Logo";
+import NavLinks from "./NavLinks";
+import ActionButtons from "./ActionButtons";
+
+const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const links = [
+        { label: "Home", href: "#top", page: "home" },
+        { label: "Features", href: "#features", page: "home" },
+        { label: "About", href: "#about", page: "home" },
+        { label: "Contact", href: "#contact", page: "home" },
+        { label: "Reservation", href: "#", page: "reservation" },
+        { label: "Scan & Park", href: "#", page: "qr" },
+    ];
+
+    const scrollToTarget = (hash) => {
+        if (!hash) return;
+        const target = document.querySelector(hash);
+        if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+            window.location.hash = hash;
+        }
+    };
+
+    const handleLinkClick = (link, event) => {
+        if (link.page === "qr" || link.page === "reservation") {
+            event.preventDefault();
+            onNavigate?.(link.page);
+        } else if (link.href?.startsWith("#")) {
+            event.preventDefault();
+            onNavigate?.("home");
+            window.setTimeout(() => {
+                scrollToTarget(link.href);
+            }, 50);
+        }
+
+        setIsMenuOpen(false);
+    };
+
+    return (
+        <nav className="site-navbar fixed top-0 left-0 z-50 w-full border-b border-[var(--color-border)] bg-[color:color-mix(in_srgb,var(--color-white)_90%,transparent)] backdrop-blur">
+            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
+                <Logo />
+
+                <div className="hidden min-[1220px]:flex items-center gap-10">
+                    <NavLinks links={links} onLinkClick={handleLinkClick} />
+                    <ActionButtons onNavigate={onNavigate} />
+                    <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
+                </div>
+
+                <div className="flex items-center gap-2 min-[1220px]:hidden">
+                    <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
+                    <button
+                        type="button"
+                        className="menu-toggle flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                        onClick={() => setIsMenuOpen((prev) => !prev)}
+                    >
+                        <span className="sr-only">{isMenuOpen ? "Close menu" : "Open menu"}</span>
+                        <div className="flex flex-col items-center justify-center gap-1">
+                            <span className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${isMenuOpen ? "translate-y-1.5 rotate-45" : ""}`} />
+                            <span className={`h-0.5 w-6 rounded-full bg-current transition-opacity duration-200 ${isMenuOpen ? "opacity-0" : "opacity-100"}`} />
+                            <span className={`h-0.5 w-6 rounded-full bg-current transition-transform duration-200 ${isMenuOpen ? "-translate-y-1.5 -rotate-45" : ""}`} />
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div
+                className={`mobile-nav fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl min-[1220px]:hidden transition-all duration-300 ease-in-out ${
+                    isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
+                }`}
+                style={{ visibility: isMenuOpen ? "visible" : "hidden" }}
+            >
+                <div className="flex min-h-full flex-col gap-6">
+                    <NavLinks
+                        links={links}
+                        mobile
+                        className="flex flex-col items-center gap-4 text-center"
+                        onLinkClick={handleLinkClick}
+                    />
+                    <ActionButtons className="flex flex-col gap-3" onNavigate={onNavigate} />
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+const ThemeToggle = ({ isDarkMode, onToggleTheme }) => (
+    <button
+        type="button"
+        className="theme-toggle relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-full border border-slate-200 text-slate-700 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 focus:outline-none focus:ring-4 focus:ring-emerald-100"
+        onClick={onToggleTheme}
+        aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+        aria-pressed={isDarkMode}
+    >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`absolute h-5 w-5 transition-all duration-300 ${isDarkMode ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"}`} aria-hidden="true"><path d="M12 3v2m0 14v2M3 12h2m14 0h2m-2.64-6.36-1.41 1.41M7.05 16.95l-1.41 1.41m0-12.72 1.41 1.41m9.9 9.9 1.41 1.41" /><circle cx="12" cy="12" r="4" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`absolute h-5 w-5 transition-all duration-300 ${isDarkMode ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"}`} aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>
+    </button>
+);
+
+export default Navbar;
