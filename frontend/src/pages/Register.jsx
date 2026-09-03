@@ -1,0 +1,96 @@
+import { useState } from 'react'
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const Icon = ({ children, className = '' }) => <svg className={`fill-none stroke-current stroke-[1.9] ${className}`} viewBox="0 0 24 24" aria-hidden="true">{children}</svg>
+const CheckIcon = () => <Icon className="h-4 w-4"><path d="m5 12 4.2 4.2L19 6.8" /></Icon>
+
+export default function Register({ onNavigate }) {
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  const [errors, setErrors] = useState({})
+  const [showPassword, setShowPassword] = useState(false)
+
+  const updateField = ({ target }) => {
+    const { name, value } = target
+    setForm((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const submit = (event) => {
+    event.preventDefault()
+    const next = {}
+
+    if (!form.name.trim()) next.name = 'Name is required.'
+    if (!form.email.trim()) next.email = 'Email address is required.'
+    else if (!emailPattern.test(form.email)) next.email = 'Enter a valid email address.'
+    if (!form.password) next.password = 'Password is required.'
+    else if (form.password.length < 6) next.password = 'Password must be at least 6 characters.'
+    if (!form.confirmPassword) next.confirmPassword = 'Confirm your password.'
+    else if (form.password !== form.confirmPassword) next.confirmPassword = 'Passwords do not match.'
+
+    setErrors(next)
+
+    if (!Object.keys(next).length) {
+      console.info('EasyPark registration validated', { name: form.name, email: form.email })
+      onNavigate?.('login')
+    }
+  }
+
+  const input = 'h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-[13px] text-slate-900 outline-none placeholder:text-slate-400 focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 aria-[invalid=true]:border-red-500'
+
+  return (
+    <main className="grid min-h-screen bg-slate-50 font-sans lg:grid-cols-[.94fr_1.06fr]">
+      <section className="mx-auto flex min-h-screen w-[min(100%-42px,460px)] flex-col justify-center py-8 lg:w-[min(100%-80px,460px)]">
+        <button type="button" onClick={() => onNavigate?.('home')} className="auth-back-link inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#475569] transition hover:text-[#16A34A]"><Icon className="h-4 w-4"><path d="m14 6-6 6 6 6M8 12h10" /></Icon>Back to home</button>
+        <div className="auth-brand-logo-log-reg mt-7 flex items-center gap-3"><img src="/Logo_icon.png" alt="EasyPark" className="h-11 w-11 rounded-xl object-cover" /><h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Easy<span className="text-[#22C55E]">Park</span></h1></div>
+        <div className="relative mt-9 rounded-[18px] border border-slate-200 bg-white px-6 py-8 shadow-[0_18px_42px_rgba(15,23,42,.055)] sm:px-[34px] before:absolute before:top-0 before:left-8 before:h-[3px] before:w-12 before:rounded-b-lg before:bg-green-500 before:content-['']">
+          <div className="mb-7">
+            <span className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.8px] text-slate-500">
+              <i className="h-2 w-2 rounded-full bg-green-500 ring-4 ring-green-500/10" />Create account
+            </span>
+            <h1 className="mt-2 text-[32px] font-bold tracking-[-1.4px] text-slate-900">
+              Get started<span className="text-green-500">.</span>
+            </h1>
+            <p className="mt-2 text-[13px] leading-6 text-slate-700">Create your EasyPark account and start parking smarter.</p>
+          </div>
+          <form className="grid gap-5" noValidate onSubmit={submit}>
+            <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
+              <span>Name</span>
+              <input className={input} name="name" type="text" placeholder="Your name" value={form.name} onChange={updateField} aria-invalid={Boolean(errors.name)} />
+              {errors.name && <small className="text-[10px] font-medium text-red-600">{errors.name}</small>}
+            </label>
+            <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
+              <span>Email address</span>
+              <input className={input} name="email" type="email" autoComplete="email" placeholder="you@example.com" value={form.email} onChange={updateField} aria-invalid={Boolean(errors.email)} />
+              {errors.email && <small className="text-[10px] font-medium text-red-600">{errors.email}</small>}
+            </label>
+            <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
+              <span>Password</span>
+              <span className="relative">
+                <input className={`${input} pr-12`} name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Create a password" value={form.password} onChange={updateField} aria-invalid={Boolean(errors.password)} />
+                <button className="absolute top-0 right-0 grid h-12 w-12 place-items-center text-slate-500 hover:text-green-500" type="button" onClick={() => setShowPassword((v) => !v)} aria-label="Toggle password visibility">
+                  <Icon className="h-[18px] w-[18px]"><path d="M2.3 10.9C3.2 9 7 4 12 4s8.8 5 9.7 6.9a1.9 1.9 0 0 1 0 1.8C20.8 13.6 17 18 12 18s-8.8-4.4-9.7-6.3a1.9 1.9 0 0 1 0-.8Z" /><circle cx="12" cy="11" r="3" /></Icon>
+                </button>
+              </span>
+              {errors.password && <small className="text-[10px] font-medium text-red-600">{errors.password}</small>}
+            </label>
+            <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
+              <span>Confirm password</span>
+              <input className={input} name="confirmPassword" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Confirm password" value={form.confirmPassword} onChange={updateField} aria-invalid={Boolean(errors.confirmPassword)} />
+              {errors.confirmPassword && <small className="text-[10px] font-medium text-red-600">{errors.confirmPassword}</small>}
+            </label>
+            <button className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600" type="submit">
+              Create account
+              <Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon>
+            </button>
+          </form>
+        </div>
+        <p className="mt-6 text-center text-[12px] text-slate-700">Already have an account? <button type="button" className="font-semibold text-green-600 hover:underline" onClick={() => onNavigate?.('login')}>Sign in</button></p>
+      </section>
+      <aside className="auth-visual-panel relative hidden min-h-screen overflow-hidden bg-[#0F172A] lg:block">
+        <img src="/Login_img.png" alt="EasyPark parking experience" className="absolute inset-0 h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/90 via-[#0F172A]/25 to-[#0F172A]/25" />
+        <div className="auth-visual-content absolute inset-x-12 bottom-12 text-white"><span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-xs font-semibold backdrop-blur"><CheckIcon /> Your parking journey starts here</span><h2 className="mt-5 text-4xl font-bold tracking-tight">A fresh start for<br />every journey.</h2><p className="auth-visual-copy mt-3 max-w-sm text-sm leading-6 text-white/80">Create your account to reserve spaces, track your vehicle, and park with confidence.</p></div>
+      </aside>
+    </main>
+  )
+}
