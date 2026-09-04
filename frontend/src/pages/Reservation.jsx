@@ -8,6 +8,12 @@ const spaces = [
     { id: "C-01", status: "available" }, { id: "C-02", status: "available" }, { id: "C-03", status: "occupied" }, { id: "C-04", status: "available" },
 ];
 
+const parkedVehicleLocation = {
+    name: "My parked vehicle",
+    destination: "6.9271,79.8612",
+    link: "https://www.google.com/maps/dir/?api=1&destination=6.9271,79.8612&travelmode=driving",
+};
+
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [selectedSpace, setSelectedSpace] = useState("A-01");
     const [isReserved, setIsReserved] = useState(false);
@@ -24,6 +30,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         if (space.status === "occupied") return;
         setSelectedSpace(space.id);
         setIsReserved(false);
+    };
+
+    const handleFindVehicle = () => {
+        window.open(parkedVehicleLocation.link, "_blank", "noopener,noreferrer");
     };
 
     return (
@@ -53,12 +63,20 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             })}
                         </div>
                         <p className="reservation-map-tip">Tap an available space to select it.</p>
+                        <div className="reservation-map-actions">
+                            <button type="button" className="reservation-button reservation-button-secondary" onClick={handleFindVehicle}>Go to my vehicle</button>
+                        </div>
                     </section>
 
                     <aside className="reservation-card reservation-summary" aria-labelledby="booking-title">
                         <p className="reservation-label">Your reservation</p>
                         <h2 id="booking-title">Review your spot</h2>
                         <div className="selected-space-display"><span>Selected space</span><strong>{selectedSpace}</strong><em>Level 1 · Main Building</em></div>
+                        <div className="reservation-vehicle-location">
+                            <span className="reservation-location-label">Parked vehicle</span>
+                            <strong>{parkedVehicleLocation.name}</strong>
+                            <small>{parkedVehicleLocation.destination}</small>
+                        </div>
                         <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
                         <button type="button" className="reservation-button" onClick={() => setIsReserved(true)}>{isReserved ? "Space Reserved" : "Reserve this space"}</button>
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace} is reserved. See you soon!</p>}
