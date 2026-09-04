@@ -390,6 +390,15 @@ html.dark .reservation-card { background: var(--color-white); box-shadow: 0 18px
   }
 }
 
+@keyframes icon-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(1.5deg);
+  }
+}
+
 @keyframes soft-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.35); }
   50% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
@@ -422,6 +431,11 @@ html.dark .reservation-card { background: var(--color-white); box-shadow: 0 18px
 
 .hero-brand-logo {
   animation: brand-enter 650ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-brand-icon {
+  animation: icon-float 3.2s ease-in-out 750ms infinite;
+  will-change: transform;
 }
 
 .hero-brand-name {
@@ -462,6 +476,7 @@ html.dark .reservation-card { background: var(--color-white); box-shadow: 0 18px
   .hero-brand-panel,
   .hero-logo-card,
   .hero-brand-logo,
+  .hero-brand-icon,
   .hero-brand-name,
   .hero-phrase-track,
   .hero-status-dot,
