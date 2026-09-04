@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
 const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
-    const userType = "staff"; // change to "staff" or "User"(another role) to show generator + scanner
+    const userType = "staff"; // change to "staff" or "user"(another role) to show generator + scanner
     const showGenerator = userType !== "user";
     const [qrText, setQrText] = useState("");
     const [qrDataUrl, setQrDataUrl] = useState("");
