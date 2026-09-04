@@ -32,9 +32,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         setIsReserved(false);
     };
 
-    const handleFindVehicle = () => {
-        window.open(parkedVehicleLocation.link, "_blank", "noopener,noreferrer");
-    };
+    const handleFindVehicle = () => onNavigate?.("tracking");
 
     return (
         <div className="reservation-page min-h-screen">
