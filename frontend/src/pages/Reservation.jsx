@@ -68,7 +68,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
               </main>
               <Footer onNavigate={onNavigate} />
             </div>
-        </div>
+        
     );
 };
 
