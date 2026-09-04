@@ -26,7 +26,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     };
 
     const handleLinkClick = (link, event) => {
-        if (link.page === "qr" || link.page === "reservation") {
+        if (link.page === "qr" || link.page === "reservation" || link.page === "tracking") {
             event.preventDefault();
             onNavigate?.(link.page);
         } else if (link.href?.startsWith("#")) {

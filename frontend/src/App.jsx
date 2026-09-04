@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CarLoader from "./components/CarLoader";
+import VehicleMap from "./components/Map/VehicleMap";
 
 function App() {
     const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +41,7 @@ function App() {
         // persist
         try {
             localStorage.setItem("easypark-theme", isDarkMode ? "dark" : "light");
-        } catch (err) {
+        } catch {
             // ignore
         }
 
@@ -94,6 +95,10 @@ function App() {
 
     if (page === "reservation") {
         return <Reservation onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+    }
+
+    if (page === "tracking") {
+        return <VehicleMap onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
     }
 
     if (page === "login") {
