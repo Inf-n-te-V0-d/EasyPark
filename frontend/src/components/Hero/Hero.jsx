@@ -26,7 +26,7 @@ const Hero = ({ onNavigate }) => (
       <div className="relative mx-auto w-full max-w-md lg:max-w-none">
         <div className="hero-brand-panel relative overflow-hidden rounded-3xl bg-[#0F172A] px-7 py-9 text-center text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)] sm:px-10 sm:py-12">
           <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#22C55E] opacity-20 blur-3xl" />
-          <div className="hero-brand-logo relative mx-auto grid h-32 w-32 place-items-center rounded-[28px] bg-white p-4 shadow-2xl sm:h-40 sm:w-40"><img src="/Logo_icon.png" alt="EasyPark smart parking logo" className="h-full w-full object-contain" /></div>
+          <div className="hero-brand-logo relative mx-auto grid h-32 w-32 place-items-center rounded-[28px] bg-white p-4 shadow-2xl sm:h-40 sm:w-40"><img src="/Logo_icon.png" alt="EasyPark smart parking logo" className="hero-brand-icon h-full w-full object-contain" /></div>
           <p className="hero-brand-name relative mt-6 text-3xl font-bold tracking-tight sm:text-4xl">Easy<span className="text-[#22C55E]">Park</span></p>
           <p className="hero-brand-tagline relative mt-2 text-sm text-slate-300 sm:text-base">Parking, tracked the easy way.</p>
           <div className="relative mt-8 h-12 overflow-hidden rounded-xl border border-white/15 bg-white/10 px-4">
