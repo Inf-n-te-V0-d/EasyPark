@@ -94,6 +94,25 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     const QR_read_result = scanResult;
 
+    const saveScannedVehicleLocation = () => {
+        try {
+            const location = JSON.parse(scanResult);
+            if (!Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
+                throw new Error("Missing coordinates");
+            }
+            localStorage.setItem("easypark-vehicle-location", JSON.stringify({
+                lat: location.lat,
+                lng: location.lng,
+                label: location.label || location.slot || "Scanned parking location",
+                slot: location.slot || "—",
+                floor: location.floor || location.level || "—",
+            }));
+            onNavigate?.("tracking");
+        } catch {
+            alert("This QR code does not contain a parking location. Use JSON such as {\"lat\":6.9271,\"lng\":79.8612,\"slot\":\"A-01\",\"floor\":\"Level 1\"}.");
+        }
+    };
+
     return (
         <div className="scan-park-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
@@ -180,6 +199,11 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                                 <p className="scan-result-value">{QR_read_result}</p>
                             </div>
                         </div>
+                        {scanResult !== "No QR scanned yet" && (
+                            <button type="button" className="scan-park-button scan-park-button-secondary mt-3 w-full" onClick={saveScannedVehicleLocation}>
+                                Save scan & view vehicle map
+                            </button>
+                        )}
                     </section>
                 </div>
             </main>
