@@ -42,7 +42,7 @@ const Services = () => (
           <h2 className="relative mt-3 text-3xl font-semibold leading-tight sm:text-4xl">Parking, made refreshingly simple.</h2>
           <p className="relative mt-4 max-w-md leading-7 text-slate-300">From finding a space to entering the gate, EasyPark keeps each step clear, quick, and stress-free.</p>
           <div className="relative mt-7 overflow-hidden rounded-2xl border border-white/15 bg-slate-800">
-            <video className="aspect-video w-full object-cover" autoPlay muted loop playsInline controls aria-label="EasyPark platform preview">
+            <video className="aspect-video w-full object-cover" autoPlay muted loop playsInline disablePictureInPicture controlsList="nodownload nofullscreen noremoteplayback" tabIndex="-1" aria-label="EasyPark platform preview">
               <source src="/videos/EasyPark_Video.mp4" type="video/mp4" />
               Your browser does not support video playback.
             </video>
