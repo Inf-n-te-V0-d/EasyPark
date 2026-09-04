@@ -11,6 +11,7 @@
 ### 5. npm install nodemon
 ### 6. npm install cors
 ### 7. npm install bcrypt
+### 8. npm install axios dotenv cors
 
 
 ## Then create .env file inside backend folder
@@ -20,6 +21,7 @@
 
 
 # FRONTEND
+### npm install leaflet react-leaflet
 ## Colour Palette
 EasyPark uses CSS theme tokens. Components should use the active `--color-*`
 tokens so they automatically adapt when light or dark mode changes.
@@ -59,3 +61,4 @@ Branch(omika) : omika-feature
 Branch(nethum) : nethum-feature-backend-routes  
 Branch(nethum) : nethum-feature-Reservation-routes  
 Branch(dilshan) : dilsha-feature   
+Branch(Milan)  : milan-map-integration
