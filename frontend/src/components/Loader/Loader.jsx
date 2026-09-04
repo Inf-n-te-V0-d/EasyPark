@@ -1,4 +1,3 @@
-import React from "react";
 import "./loader.css";
 
 const Loader = ({ duration = 700 }) => {
