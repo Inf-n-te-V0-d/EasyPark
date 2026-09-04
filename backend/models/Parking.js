@@ -26,7 +26,7 @@ const parkingSchema = new mongoose.Schema(
     status : {
         type : String,
         enum : [
-            "occuied",
+            "occupied",
             "available"
         ],
         default : "available"
