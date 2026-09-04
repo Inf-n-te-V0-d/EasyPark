@@ -1,0 +1,79 @@
+:root {
+  --loader-overlay-bg: color-mix(in srgb, var(--color-background) 86%, transparent);
+}
+
+.loader-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: var(--loader-overlay-bg);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.loader-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 6px solid rgba(15, 23, 42, 0.06);
+  border-top-color: var(--color-primary);
+  animation: lp-spin 900ms linear infinite;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.loader-bar-wrap {
+  width: 220px;
+  height: 8px;
+  background: color-mix(in srgb, var(--color-white) 40%, var(--color-border));
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 60%, transparent));
+  border-radius: 999px;
+  animation: lp-fill var(--load-duration, 700ms) linear forwards;
+}
+
+.loader-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.loader-dots span {
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  display: inline-block;
+  animation: lp-bounce 900ms infinite ease-in-out;
+}
+
+.loader-dots span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.loader-dots span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes lp-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes lp-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.9; }
+  40% { transform: translateY(-12px); opacity: 1; }
+}
+
+@keyframes lp-fill {
+  to { width: 100%; }
+}
