@@ -5,24 +5,383 @@
   place-content: center;
   overflow: hidden;
   padding: 2rem;
-  background: linear-gradient(150deg, #f8fafc 0%, #ecfdf5 100%);
-  color: #0f172a;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 24%),
+    linear-gradient(150deg, #000000 0%, #111827 30%, #0f172a 65%, #020617 100%);
+  color: #f8fafc;
   text-align: center;
 }
 
-.car-loader__brand { margin-bottom: 2.5rem; font-size: clamp(1.65rem, 4vw, 2.05rem); font-weight: 700; letter-spacing: -.06em; }
-.car-loader__brand span { color: #22c55e; }
-.car-loader__scene { position: relative; width: min(80vw, 25rem); height: 10rem; overflow: hidden; }
-.car-loader__road { position: absolute; right: 0; bottom: 0; left: 0; height: 1.35rem; overflow: hidden; border-top: 3px solid #64748b; background: #334155; }
-.car-loader__road i { position: absolute; top: .55rem; width: 3.5rem; height: .18rem; background: #f8fafc; animation: car-loader-road 1.1s linear infinite; }
-.car-loader__road i:nth-child(1) { left: -1rem; }.car-loader__road i:nth-child(2) { left: 32%; animation-delay: -.28s; }.car-loader__road i:nth-child(3) { left: 64%; animation-delay: -.56s; }.car-loader__road i:nth-child(4) { left: 96%; animation-delay: -.84s; }
-.car-loader__car { position: absolute; bottom: 1.12rem; left: 50%; width: 9.25rem; height: 4.3rem; transform: translateX(-50%); animation: car-loader-bob .5s ease-in-out infinite alternate; }
-.car-loader__car-body { position: absolute; right: 0; bottom: .55rem; left: 0; height: 2.25rem; border-radius: 1.1rem .8rem .5rem .5rem; background: #22c55e; box-shadow: inset 0 -.45rem 0 #16a34a, 0 .65rem .95rem rgba(15, 23, 42, .16); }
-.car-loader__car-body::before { position: absolute; top: .5rem; left: .55rem; width: .45rem; height: .45rem; border-radius: 50%; background: #dcfce7; box-shadow: 7.2rem 0 #fef08a; content: ""; }
-.car-loader__car-body i { position: absolute; top: .45rem; width: 2.1rem; height: .9rem; border-radius: .25rem; background: #bbf7d0; }.car-loader__car-body i:first-child { left: 2rem; }.car-loader__car-body i:last-child { left: 4.35rem; }
-.car-loader__car-top { position: absolute; bottom: 2.3rem; left: 2.25rem; width: 4.7rem; height: 1.7rem; border-radius: 1.35rem 1.35rem .1rem .1rem; background: #16a34a; }
-.car-loader__wheel { position: absolute; z-index: 2; bottom: 0; width: 1.45rem; height: 1.45rem; border: .35rem solid #1e293b; border-radius: 50%; background: #94a3b8; animation: car-loader-wheel .45s linear infinite; }.car-loader__wheel--left { left: 1rem; }.car-loader__wheel--right { right: 1rem; }
-.car-loader__cloud { position: absolute; width: 4rem; height: .8rem; border-radius: 99px; background: #dcfce7; opacity: .75; animation: car-loader-cloud 4s linear infinite; }.car-loader__cloud::before { position: absolute; bottom: 0; left: .65rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: inherit; content: ""; }.car-loader__cloud--one { top: 1.5rem; left: -4rem; }.car-loader__cloud--two { top: 3.2rem; left: -7rem; opacity: .45; animation-delay: -2s; }
-.car-loader p { margin: 1.5rem 0 0; color: #475569; font-size: .82rem; font-weight: 600; }.car-loader__dots { display: inline-block; width: 1.2rem; overflow: hidden; vertical-align: bottom; animation: car-loader-dots 1.2s steps(4, end) infinite; }
-@keyframes car-loader-road { to { transform: translateX(-4rem); } } @keyframes car-loader-wheel { to { transform: rotate(1turn); } } @keyframes car-loader-bob { to { transform: translateX(-50%) translateY(-.18rem); } } @keyframes car-loader-cloud { to { transform: translateX(32rem); } } @keyframes car-loader-dots { to { width: 0; } }
-@media (prefers-reduced-motion: reduce) { .car-loader *, .car-loader *::before { animation: none !important; } }
+.car-loader__brand {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 1.25rem;
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.08em;
+  color: #f8fafc;
+  text-shadow: 0 10px 25px rgba(15, 23, 42, 0.4);
+}
+
+.car-loader__brand span {
+  color: #4ade80;
+}
+
+.car-loader__scene {
+  position: relative;
+  width: min(82vw, 31rem);
+  height: 12.5rem;
+  overflow: hidden;
+  border-radius: 2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(148, 163, 184, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 22px 45px rgba(0, 0, 0, 0.45);
+}
+
+.car-loader__sun {
+  position: absolute;
+  right: 2.25rem;
+  top: 1.15rem;
+  width: 4.7rem;
+  height: 4.7rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fffdf1 0%, #fde68a 32%, #fbbf24 68%, rgba(251, 191, 36, 0.18) 100%);
+  box-shadow: 0 0 0 0.7rem rgba(253, 224, 71, 0.14), 0 0 2rem rgba(254, 240, 138, 0.6);
+  animation: car-loader-sun 2.4s ease-in-out infinite;
+}
+
+.car-loader__sparkle {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0.7rem rgba(255, 255, 255, 0.9);
+  animation: car-loader-sparkle 1.7s ease-in-out infinite;
+}
+
+.car-loader__sparkle::before,
+.car-loader__sparkle::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 0.22rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.car-loader__sparkle::after {
+  width: 1.2rem;
+  height: 0.22rem;
+}
+
+.car-loader__sparkle--one { top: 2.1rem; right: 7rem; animation-delay: 0s; }
+.car-loader__sparkle--two { top: 2.7rem; right: 9.2rem; animation-delay: 0.5s; }
+.car-loader__sparkle--three { top: 1.2rem; right: 10.6rem; animation-delay: 1s; }
+
+.car-loader__cloud {
+  position: absolute;
+  width: 4.2rem;
+  height: 1.2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: 0 0.75rem 1.1rem rgba(255, 255, 255, 0.15);
+  animation: car-loader-cloud 7s linear infinite;
+}
+
+.car-loader__cloud::before,
+.car-loader__cloud::after {
+  position: absolute;
+  border-radius: 50%;
+  background: inherit;
+  content: "";
+}
+
+.car-loader__cloud::before {
+  left: 0.7rem;
+  bottom: 0.15rem;
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.car-loader__cloud::after {
+  left: 2rem;
+  bottom: 0.35rem;
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+.car-loader__cloud--one {
+  top: 2.1rem;
+  left: -4.4rem;
+  opacity: 0.88;
+}
+
+.car-loader__cloud--two {
+  top: 3.2rem;
+  left: -7.2rem;
+  opacity: 0.6;
+  animation-delay: -3.2s;
+}
+
+.car-loader__road {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2.25rem;
+  overflow: hidden;
+  border-top: 0.2rem solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(180deg, #334155 0%, #1e293b 48%, #0f172a 100%);
+}
+
+.car-loader__road span {
+  position: absolute;
+  top: 0.95rem;
+  width: 3.6rem;
+  height: 0.3rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  animation: car-loader-road 0.9s linear infinite;
+}
+
+.car-loader__road span:nth-child(1) { left: -1.5rem; }
+.car-loader__road span:nth-child(2) { left: 31%; animation-delay: -0.22s; }
+.car-loader__road span:nth-child(3) { left: 63%; animation-delay: -0.46s; }
+.car-loader__road span:nth-child(4) { left: 96%; animation-delay: -0.68s; }
+
+.car-loader__car {
+  position: absolute;
+  left: 50%;
+  bottom: 1.3rem;
+  width: 12rem;
+  height: 5.5rem;
+  transform: translateX(-50%);
+  animation: car-loader-bob 0.75s ease-in-out infinite alternate;
+}
+
+.car-loader__car-shadow {
+  position: absolute;
+  inset: auto 1.1rem 0.15rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.3);
+  filter: blur(7px);
+  transform: scaleX(1.1);
+}
+
+.car-loader__car-top {
+  position: absolute;
+  left: 2.5rem;
+  bottom: 2.7rem;
+  width: 5.4rem;
+  height: 1.9rem;
+  border-radius: 1.4rem 1.4rem 0.8rem 0.8rem;
+  background: linear-gradient(135deg, #d1fae5 0%, #86efac 25%, #4ade80 55%, #22c55e 100%);
+  box-shadow: inset -0.2rem -0.45rem 0 rgba(12, 79, 52, 0.18);
+}
+
+.car-loader__car-top span {
+  position: absolute;
+  inset: 0.45rem auto auto 0.9rem;
+  width: 2.7rem;
+  height: 0.68rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.car-loader__car-top i {
+  position: absolute;
+  right: -0.2rem;
+  bottom: 0.3rem;
+  width: 0.9rem;
+  height: 0.75rem;
+  border-radius: 0.2rem 0.5rem 0.3rem 0.2rem;
+  background: rgba(34, 197, 94, 0.65);
+}
+
+.car-loader__car-body {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 1rem;
+  left: 0.5rem;
+  height: 2.35rem;
+  border-radius: 1.55rem 1.15rem 0.8rem 0.8rem;
+  background: linear-gradient(135deg, #7ef2b7 0%, #34d399 35%, #16a34a 100%);
+  box-shadow: inset 0 -0.45rem 0 rgba(22, 163, 74, 0.7), 0 0.8rem 1.1rem rgba(15, 23, 42, 0.12);
+}
+
+.car-loader__car-body::before {
+  position: absolute;
+  top: 0.52rem;
+  left: 0.7rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: #ecfeff;
+  box-shadow: 7.1rem 0 0 #fef3c7;
+  content: "";
+}
+
+.car-loader__car-body i {
+  position: absolute;
+  top: 0.44rem;
+  width: 2rem;
+  height: 0.82rem;
+  border-radius: 0.4rem;
+  background: rgba(240, 253, 244, 0.7);
+}
+
+.car-loader__car-body i:first-child { left: 2.15rem; }
+.car-loader__car-body i:last-child { left: 4.45rem; }
+
+.car-loader__car-body em {
+  position: absolute;
+  right: 0.8rem;
+  top: 0.4rem;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: rgba(254, 240, 138, 0.92);
+  box-shadow: 0 0 0.5rem rgba(254, 240, 138, 0.8);
+}
+
+.car-loader__wheel {
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 0.35rem solid #1f2937;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #cbd5e1 0%, #94a3b8 42%, #475569 100%);
+  animation: car-loader-wheel 0.55s linear infinite;
+}
+
+.car-loader__wheel span {
+  position: absolute;
+  inset: 0.34rem;
+  border-radius: 50%;
+  border: 0.12rem solid rgba(255, 255, 255, 0.35);
+}
+
+.car-loader__wheel--left { left: 1rem; }
+.car-loader__wheel--right { right: 1rem; }
+
+.car-loader__headlight {
+  position: absolute;
+  right: 0.3rem;
+  bottom: 1.5rem;
+  width: 0.8rem;
+  height: 0.6rem;
+  border-radius: 0.3rem;
+  background: linear-gradient(90deg, #fef3c7, #fbbf24);
+  box-shadow: 0 0 0.9rem rgba(251, 191, 36, 0.9);
+}
+
+.car-loader__taillight {
+  position: absolute;
+  left: 0.65rem;
+  bottom: 1.55rem;
+  width: 0.6rem;
+  height: 0.46rem;
+  border-radius: 0.2rem;
+  background: #fca5a5;
+  box-shadow: 0 0 0.6rem rgba(248, 113, 113, 0.8);
+}
+
+.car-loader__smoke {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.8rem;
+  width: 11rem;
+  height: 3rem;
+  pointer-events: none;
+}
+
+.car-loader__smoke-puff {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  filter: blur(2px);
+  animation: car-loader-smoke 2.4s ease-in infinite;
+}
+
+.car-loader__smoke-puff--one { left: 0; animation-delay: 0s; }
+.car-loader__smoke-puff--two { left: 1.1rem; width: 1.8rem; height: 1.8rem; animation-delay: 0.7s; }
+.car-loader__smoke-puff--three { left: 2.4rem; width: 2.3rem; height: 2.3rem; animation-delay: 1.2s; }
+
+.car-loader p {
+  margin: 1.35rem 0 0;
+  color: rgba(248, 250, 252, 0.85);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.car-loader__dots {
+  display: inline-block;
+  width: 1.2rem;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: car-loader-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes car-loader-road {
+  to { transform: translateX(-4.2rem); }
+}
+
+@keyframes car-loader-wheel {
+  to { transform: rotate(1turn); }
+}
+
+@keyframes car-loader-bob {
+  to { transform: translateX(-50%) translateY(-0.2rem); }
+}
+
+@keyframes car-loader-cloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(30rem); }
+}
+
+@keyframes car-loader-sun {
+  0%, 100% { transform: scale(1); filter: saturate(1); }
+  50% { transform: scale(1.08); filter: saturate(1.25); }
+}
+
+@keyframes car-loader-sparkle {
+  0%, 100% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes car-loader-dots {
+  to { width: 0; }
+}
+
+@keyframes car-loader-smoke {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.55);
+    opacity: 0.2;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate3d(-1.4rem, -1.2rem, 0) scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .car-loader *,
+  .car-loader *::before,
+  .car-loader *::after {
+    animation: none !important;
+  }
+}
