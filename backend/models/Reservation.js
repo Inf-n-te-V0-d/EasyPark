@@ -6,9 +6,9 @@ const reservationSchema = new mongoose.Schema({
         ref: "User",
         required: true
     },
-    //temp
     parkingSlot:{
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Parking",
         required: true,
     },
     reservationDate:{

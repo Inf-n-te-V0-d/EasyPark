@@ -1,7 +1,7 @@
 const Parking = require("../models/Parking");
 const mongoose = require("mongoose");
 
-//GET all reservations
+//GET all parkings
 const getParkings = async (req, res) => {
   try {
     const parking = await Parking.find().sort({ createdAt: -1 });
@@ -11,7 +11,7 @@ const getParkings = async (req, res) => {
   }
 };
 
-//GET a single reservation
+//GET a single parking
 const getParking = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -28,7 +28,7 @@ const getParking = async (req, res) => {
   }
 };
 
-// ADD a reservation
+// ADD a parking
 const addParking = async (req, res) => {
   try {
     const parking = new Parking(req.body);
@@ -39,7 +39,7 @@ const addParking = async (req, res) => {
   }
 };
 
-// UPDATE a reservation
+// UPDATE a parking
 const updateParking = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -60,7 +60,7 @@ const updateParking = async (req, res) => {
   }
 };
 
-// DELETE a reservation
+// DELETE a parking
 const deleteParking = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
