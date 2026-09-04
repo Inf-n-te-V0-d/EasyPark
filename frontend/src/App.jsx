@@ -10,8 +10,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import CarLoader from "./components/CarLoader";
 
 function App() {
+    const [isLoading, setIsLoading] = useState(true);
     const [page, setPage] = useState(() => {
         const hash = window.location.hash.replace("#", "").trim();
         if (hash === "privacy" || hash === "terms") {
@@ -67,6 +69,24 @@ function App() {
 
         return () => window.removeEventListener("hashchange", syncPageFromHash);
     }, []);
+
+    useEffect(() => {
+        const finishLoading = () => window.setTimeout(() => setIsLoading(false), 850);
+        const timer = document.readyState === "complete" ? finishLoading() : null;
+
+        if (timer === null) {
+            window.addEventListener("load", finishLoading, { once: true });
+        }
+
+        return () => {
+            if (timer) window.clearTimeout(timer);
+            window.removeEventListener("load", finishLoading);
+        };
+    }, []);
+
+    if (isLoading) {
+        return <CarLoader />;
+    }
 
     if (page === "qr") {
         return <QrScanner onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
