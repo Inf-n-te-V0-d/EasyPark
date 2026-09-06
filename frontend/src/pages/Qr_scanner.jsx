@@ -18,6 +18,8 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [sessionError, setSessionError] = useState("");
     const [reservationMessage, setReservationMessage] = useState("");
     const [reservationError, setReservationError] = useState("");
+    const [pendingSlot, setPendingSlot] = useState(null);
+    const [vehicleNumber, setVehicleNumber] = useState("");
     const scannerRef = useRef(null);
     const scanProcessingRef = useRef(false);
     const readerId = "reader";
@@ -112,7 +114,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             });
 
             if (isReservedByUser) {
-                setReservationMessage(`Parking slot ${parkingSpace.slot} is yours.`);
+                setReservationMessage(`Parking slot ${parkingSpace.slot}: ${parkingSpace.status}.`);
                 return;
             }
 
@@ -120,32 +122,52 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 throw new Error(`Parking slot ${parkingSpace.slot} is not available.`);
             }
 
+            setPendingSlot(parkingSpace);
+            setVehicleNumber("");
+        } catch (error) {
+            setReservationError(error.message);
+        } finally {
+            scanProcessingRef.current = false;
+        }
+    };
+
+    const confirmScannedReservation = async () => {
+        if (!pendingSlot) return;
+        if (!vehicleNumber.trim()) {
+            setReservationError("Please enter your vehicle number before reserving.");
+            return;
+        }
+
+        setReservationError("");
+        setReservationMessage("");
+        try {
             const startTime = new Date();
             const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
             await apiRequest("/reservation", {
                 method: "POST",
                 body: JSON.stringify({
-                    parkingSlot: parkingSpace._id,
+                    parkingSlot: pendingSlot._id,
+                    vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
                     startTime: startTime.toISOString(),
                     endTime: endTime.toISOString(),
                     totalAmount: 0,
                 }),
             });
 
-            if (Number.isFinite(Number(parkingSpace.latitude)) && Number.isFinite(Number(parkingSpace.longitude))) {
+            if (Number.isFinite(Number(pendingSlot.latitude)) && Number.isFinite(Number(pendingSlot.longitude))) {
                 saveVehicleLocation({
-                    lat: Number(parkingSpace.latitude),
-                    lng: Number(parkingSpace.longitude),
-                    label: `Reserved vehicle · ${parkingSpace.slot}`,
-                    slot: parkingSpace.slot,
-                    floor: `Level ${parkingSpace.floor}`,
+                    lat: Number(pendingSlot.latitude),
+                    lng: Number(pendingSlot.longitude),
+                    label: `Reserved vehicle · ${pendingSlot.slot}`,
+                    slot: pendingSlot.slot,
+                    floor: `Level ${pendingSlot.floor}`,
                 });
             }
-            setReservationMessage(`Success! Parking slot ${parkingSpace.slot} is reserved for you.`);
+            setReservationMessage(`Success! Parking slot ${pendingSlot.slot} is reserved for you.`);
+            setPendingSlot(null);
+            setVehicleNumber("");
         } catch (error) {
             setReservationError(error.message);
-        } finally {
-            scanProcessingRef.current = false;
         }
     };
 
@@ -190,25 +212,6 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     const QR_read_result = scanResult;
 
-    const saveScannedVehicleLocation = () => {
-        try {
-            const location = JSON.parse(scanResult);
-            if (!Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
-                throw new Error("Missing coordinates");
-            }
-            saveVehicleLocation({
-                lat: location.lat,
-                lng: location.lng,
-                label: location.label || location.slot || "Scanned parking location",
-                slot: location.slot || "—",
-                floor: location.floor || location.level || "—",
-            });
-            onNavigate?.("tracking");
-        } catch {
-            alert("This QR code does not contain a parking location. Use JSON such as {\"lat\":6.9271,\"lng\":79.8612,\"slot\":\"A-01\",\"floor\":\"Level 1\"}.");
-        }
-    };
-
     return (
         <div className="scan-park-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
@@ -218,94 +221,34 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 <div className="scan-park-hero">
                     <span className="scan-park-eyebrow"><span className="scan-park-live-dot" /> EasyPark QR Hub</span>
                     <h1>Scan, park, <span>go.</span></h1>
-                    <p>
-                        {showGenerator
-                            ? "Generate and share parking QR codes for your facility, or scan one to check a vehicle location in seconds."
-                            : "Scan your parking QR code in seconds to check in and find your vehicle location when you are ready to leave."}
-                    </p>
+                    <p>{showGenerator ? "Generate and share parking QR codes for your facility, or scan one to check a vehicle location in seconds." : "Scan your parking QR code in seconds to check in at your assigned parking space."}</p>
                 </div>
-
                 <div className={`scan-park-grid ${showGenerator ? "scan-park-grid-two" : "scan-park-grid-single"}`}>
                     {showGenerator && (
                         <section className="scan-park-card scan-generator-card">
-                            <div className="scan-card-heading">
-                                <span className="scan-card-icon" aria-hidden="true">⌘</span>
-                                <div>
-                                    <span className="scan-card-kicker">Create</span>
-                                    <h2>QR Code Generator</h2>
-                                </div>
-                            </div>
+                            <div className="scan-card-heading"><span className="scan-card-icon" aria-hidden="true">⌘</span><div><span className="scan-card-kicker">Create</span><h2>QR Code Generator</h2></div></div>
                             <p className="scan-card-description">Add a link, reference, or parking detail to create a shareable QR code.</p>
-                            <input
-                                value={qrText}
-                                onChange={(event) => setQrText(event.target.value)}
-                                placeholder="Enter text or URL"
-                                className="scan-park-input"
-                            />
-                            <div className="scan-park-actions">
-                                <button
-                                    onClick={generateQR}
-                                    className="scan-park-button scan-park-button-primary"
-                                >
-                                    Generate QR
-                                </button>
-                                <button
-                                    onClick={downloadQR}
-                                    className="scan-park-button scan-park-button-secondary"
-                                >
-                                    Download QR
-                                </button>
-                            </div>
-                            <div
-                                id="qrcode"
-                                className="scan-park-qr-preview"
-                            >
-                                {qrDataUrl ? (
-                                    <img src={qrDataUrl} alt="Generated QR code" className="mx-auto" />
-                                ) : (
-                                    <div className="scan-park-empty-qr">
-                                        <span aria-hidden="true">⌘</span>
-                                        <p>QR code preview will appear here.</p>
-                                    </div>
-                                )}
-                            </div>
+                            <input value={qrText} onChange={(event) => setQrText(event.target.value)} placeholder="Enter text or URL" className="scan-park-input" />
+                            <div className="scan-park-actions"><button onClick={generateQR} className="scan-park-button scan-park-button-primary">Generate QR</button><button onClick={downloadQR} className="scan-park-button scan-park-button-secondary">Download QR</button></div>
+                            <div id="qrcode" className="scan-park-qr-preview">{qrDataUrl ? <img src={qrDataUrl} alt="Generated QR code" className="mx-auto" /> : <div className="scan-park-empty-qr"><span aria-hidden="true">⌘</span><p>QR code preview will appear here.</p></div>}</div>
                         </section>
                     )}
-
                     <section className="scan-park-card scan-scanner-card">
-                        <div className="scan-card-heading">
-                            <span className="scan-card-icon scan-card-icon-camera" aria-hidden="true">⌁</span>
-                            <div>
-                                <span className="scan-card-kicker">Arrive</span>
-                                <h2>QR Code Scanner</h2>
-                            </div>
-                        </div>
-                        <p className="scan-card-description">Use your device camera to check in at your assigned parking space.</p>
-                        <button
-                            onClick={startScanner}
-                            className="scan-park-button scan-park-button-primary scan-camera-button"
-                        >
-                            <span aria-hidden="true">◉</span> Start Camera
-                        </button>
-                        <div className="scan-camera-shell">
-                            <div className="scan-camera-corners" aria-hidden="true" />
-                            <div id={readerId} className="scan-reader" />
-                            <p className="scan-camera-hint">Position the QR code inside the frame</p>
-                        </div>
-                        <div className="scan-result" aria-live="polite">
-                            <span className="scan-result-icon" aria-hidden="true">✓</span>
-                            <div>
-                                <p className="scan-result-label">Latest scan</p>
-                                <p className="scan-result-value">{QR_read_result}</p>
-                            </div>
-                        </div>
+                        <div className="scan-card-heading"><span className="scan-card-icon scan-card-icon-camera" aria-hidden="true">⌁</span><div><span className="scan-card-kicker">Arrive</span><h2>QR Code Scanner</h2></div></div>
+                        <p className="scan-card-description">Use your device camera to reserve your assigned parking space.</p>
+                        <button onClick={startScanner} className="scan-park-button scan-park-button-primary scan-camera-button"><span aria-hidden="true">◉</span> Start Camera</button>
+                        <div className="scan-camera-shell"><div className="scan-camera-corners" aria-hidden="true" /><div id={readerId} className="scan-reader" /><p className="scan-camera-hint">Position the QR code inside the frame</p></div>
+                        <div className="scan-result" aria-live="polite"><span className="scan-result-icon" aria-hidden="true">✓</span><div><p className="scan-result-label">Latest scan</p><p className="scan-result-value">{QR_read_result}</p></div></div>
                         {reservationMessage && <p className="reservation-success mt-3" role="status">{reservationMessage}</p>}
                         {reservationError && <p className="user-alert user-alert-error mt-3" role="alert">{reservationError}</p>}
-                        {scanResult !== "No QR scanned yet" && (
-                            <button type="button" className="scan-park-button scan-park-button-secondary mt-3 w-full" onClick={saveScannedVehicleLocation}>
-                                Save scan & view vehicle map
+                        <div className="scan-qr-reservation-form">
+                            <p className="reservation-label">{pendingSlot ? `Slot scanned: ${pendingSlot.slot}` : "Scan an available slot to reserve"}</p>
+                            <label className="reservation-label" htmlFor="scanned-vehicle-number">Vehicle number</label>
+                            <input id="scanned-vehicle-number" autoFocus value={vehicleNumber} onChange={(event) => setVehicleNumber(event.target.value)} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
+                            <button type="button" className="scan-park-button scan-park-button-primary mt-3 w-full" onClick={confirmScannedReservation} disabled={!pendingSlot || !vehicleNumber.trim()}>
+                                Reserve slot
                             </button>
-                        )}
+                        </div>
                     </section>
                 </div>
             </main>

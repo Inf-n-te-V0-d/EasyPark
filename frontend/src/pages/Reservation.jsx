@@ -23,6 +23,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
+    const [vehicleNumber, setVehicleNumber] = useState("");
 
     useEffect(() => {
         window.scrollTo({
@@ -92,6 +93,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             return;
         }
         if (!selectedSpace) return;
+        if (!vehicleNumber.trim()) {
+            setError("Please enter your vehicle number before reserving.");
+            return;
+        }
 
         const startTime = new Date();
         const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
@@ -103,6 +108,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 body: JSON.stringify({
                     user: user._id,
                     parkingSlot: selectedSpace._id,
+                    vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
                     startTime: startTime.toISOString(),
                     endTime: endTime.toISOString(),
                     totalAmount: 0,
@@ -173,6 +179,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
                         <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
+                        <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
+                        <input id="vehicle-number" value={vehicleNumber} onChange={(event) => setVehicleNumber(event.target.value)} placeholder="Enter vehicle number" className="scan-park-input mt-2 mb-4" maxLength={20} />
                         {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
