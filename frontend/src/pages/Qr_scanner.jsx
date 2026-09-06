@@ -15,6 +15,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [qrText, setQrText] = useState("");
     const [qrDataUrl, setQrDataUrl] = useState("");
     const [scanResult, setScanResult] = useState("No QR scanned yet");
+    const [sessionError, setSessionError] = useState("");
     const scannerRef = useRef(null);
     const readerId = "reader";
 
@@ -33,7 +34,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
         apiRequest(`/users/${userId}`)
             .then((user) => setIsAdmin(String(user.role || user.userType || "").toLowerCase() === "admin"))
-            .catch(() => null);
+            .catch((error) => setSessionError(error.message));
     }, [token, userId]);
 
     const generateQR = async () => {
@@ -131,6 +132,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <main className="scan-park-main">
                 <BackButton onNavigate={onNavigate} />
+                {sessionError && <p className="user-alert user-alert-error" role="alert">{sessionError}</p>}
                 <div className="scan-park-hero">
                     <span className="scan-park-eyebrow"><span className="scan-park-live-dot" /> EasyPark QR Hub</span>
                     <h1>Scan, park, <span>go.</span></h1>
