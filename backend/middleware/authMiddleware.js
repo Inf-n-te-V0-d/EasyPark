@@ -1,13 +1,16 @@
-const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-const getSecret = () => process.env.AUTH_SECRET || "easypark-development-secret";
+const getSecret = () => {
+  if (!process.env.AUTH_SECRET) {
+    throw new Error("AUTH_SECRET is not configured");
+  }
+
+  return process.env.AUTH_SECRET;
+};
 
 const createToken = (userId) => {
-  const expiresAt = Math.floor(Date.now() / 1000) + 60 * 60 * 24;
-  const payload = `${userId}.${expiresAt}`;
-  const signature = crypto.createHmac("sha256", getSecret()).update(payload).digest("hex");
-  return `${payload}.${signature}`;
+  return jwt.sign({ sub: userId }, getSecret(), { expiresIn: "24h" });
 };
 
 const requireAuth = async (req, res, next) => {
@@ -20,16 +23,11 @@ const requireAuth = async (req, res, next) => {
   }
 
   try {
-    const [userId, expiresAt, signature] = token.split(".");
-    const payload = `${userId}.${expiresAt}`;
-    const expectedSignature = crypto.createHmac("sha256", getSecret()).update(payload).digest("hex");
-    const validSignature = signature && crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature),
-    );
+    const decoded = jwt.verify(token, getSecret());
+    const userId = decoded.sub || decoded.userId || decoded.id;
 
-    if (!userId || !expiresAt || !validSignature || Number(expiresAt) < Math.floor(Date.now() / 1000)) {
-      return res.status(401).json({ message: "Your session has expired. Please sign in again." });
+    if (!userId) {
+      return res.status(401).json({ message: "Invalid authentication token." });
     }
 
     const user = await User.findById(userId).select("-password");
@@ -40,7 +38,7 @@ const requireAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch {
-    return res.status(401).json({ message: "Invalid authentication token." });
+    return res.status(401).json({ message: "Your session has expired. Please sign in again." });
   }
 };
 
