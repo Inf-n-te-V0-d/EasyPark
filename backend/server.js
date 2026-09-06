@@ -63,10 +63,23 @@ app.get("/health", (req, res) => {
 // DB connection (Most suitable)
 async function startServer() {
   try {
-    const mongoUri = process.env.MONGO_URI || process.env.MONGO_LOCAL || "mongodb://127.0.0.1:27017/easypark";
-    const port = Number(process.env.PORT) || 5000;
+    const getMongoUri = () => {
+      if(!process.env.MONGO_LOCAL){
+        throw new Error("MONGO_LOCAL is not configured.");
+      }
+      return process.env.MONGO_LOCAL;
+    }
 
-    await mongoose.connect(mongoUri);
+    const getPort = () => {
+      if(!process.env.PORT){
+        throw new Error("PORT is not configured.");
+      }
+      return process.env.PORT;
+    }
+    //const mongoUri = process.env.MONGO_URI || process.env.MONGO_LOCAL || "mongodb://127.0.0.1:27017/easypark";
+    //const port = Number(process.env.PORT) || 5000;
+
+    await mongoose.connect(getMongoUri());
 
     if (await Parking.countDocuments() === 0) {
       await Parking.insertMany(
@@ -83,8 +96,8 @@ async function startServer() {
 
     console.log("Connected to Database!");
 
-    app.listen(port, () => {
-      console.log(`Listening on PORT ${port}.`);
+    app.listen(getPort(), () => {
+      console.log(`Listening on PORT ${getPort()}.`);
     });
   } catch (error) {
     console.error(`An error occurred, ${error}`);
