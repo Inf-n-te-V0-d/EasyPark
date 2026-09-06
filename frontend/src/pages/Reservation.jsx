@@ -11,6 +11,17 @@ const parkedVehicleLocation = {
 };
 
 const getReservationSlotId = (reservation) => String(reservation.parkingSlot?._id || reservation.parkingSlot || "");
+const getToday = () => {
+    const date = new Date();
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+};
+
+const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours} hour${hours === 1 ? "" : "s"}${remainingMinutes ? ` ${remainingMinutes} minutes` : ""}`;
+};
 
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const currentUser = getSession();
@@ -25,6 +36,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [error, setError] = useState("");
     const [vehicleNumber, setVehicleNumber] = useState("");
     const [vehicleNumberError, setVehicleNumberError] = useState("");
+    const [arrivalDate, setArrivalDate] = useState(getToday);
+    const [arrivalStart, setArrivalStart] = useState("09:00");
+    const [arrivalEnd, setArrivalEnd] = useState("11:00");
+
+    const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
+    const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
+    const durationMinutes = startDateTime.getTime() && endDateTime.getTime() && endDateTime > startDateTime
+        ? Math.round((endDateTime - startDateTime) / 60000)
+        : 0;
 
     useEffect(() => {
         window.scrollTo({
@@ -99,12 +119,14 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             return;
         }
         setVehicleNumberError("");
+        if (!durationMinutes) {
+            setError("Please choose a valid arrival time range.");
+            return;
+        }
 
         setIsSaving(true);
         setError("");
         try {
-            const startDateTime = new Date();
-            const endDateTime = new Date(startDateTime.getTime() + 2 * 60 * 60 * 1000);
             await apiRequest("/reservation", {
                 method: "POST",
                 body: JSON.stringify({
@@ -183,6 +205,18 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
                         <input id="vehicle-number" required value={vehicleNumber} onChange={(event) => { setVehicleNumber(event.target.value); setVehicleNumberError(""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
                         {vehicleNumberError && <p className="user-alert user-alert-error mt-2" role="alert">{vehicleNumberError}</p>}
+                        <dl className="reservation-details reservation-arrival-details">
+                            <div>
+                                <dt>Arrival date</dt>
+                                <dd><input type="date" value={arrivalDate} min={getToday()} onChange={(event) => setArrivalDate(event.target.value)} /></dd>
+                            </div>
+                            <div className="reservation-time-range">
+                                <label><span>From</span><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></label>
+                                <span aria-hidden="true">-</span>
+                                <label><span>To</span><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></label>
+                            </div>
+                            <div><dt>Duration</dt><dd>{durationMinutes ? formatDuration(durationMinutes) : "Choose a valid time range"}</dd></div>
+                        </dl>
                         {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
