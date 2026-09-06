@@ -24,8 +24,9 @@ const emptySlotForm = { slot: "", floor: "1", latitude: "6.9271", longitude: "79
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const currentUser = getSession();
     const currentUserId = currentUser?._id;
-    const isAdmin = currentUser?.role === "admin";
     const [spaces, setSpaces] = useState([]);
+    const [verifiedRole, setVerifiedRole] = useState("");
+    const isAdmin = verifiedRole === "admin";
     const [myReservations, setMyReservations] = useState([]);
     const [selectedSpace, setSelectedSpace] = useState(null);
     const [isReserved, setIsReserved] = useState(false);
@@ -63,10 +64,12 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         Promise.all([
             apiRequest("/parking"),
             currentUserId ? apiRequest(`/reservation/user/${currentUserId}`) : Promise.resolve([]),
+            currentUserId ? apiRequest(`/users/${currentUserId}`) : Promise.resolve(null),
         ])
-            .then(([parking, reservations]) => {
+            .then(([parking, reservations, profile]) => {
                 if (!active) return;
                 setSpaces(parking);
+                setVerifiedRole(profile?.role === "admin" ? "admin" : "");
                 setMyReservations(reservations.filter((reservation) => reservation.status !== "cancelled"));
                 const ownedSlotIds = new Set(reservations.filter((reservation) => reservation.status !== "cancelled").map(getReservationSlotId));
                 const initialSpace = parking.find((space) => ownedSlotIds.has(String(space._id))) || parking.find((space) => space.status === "available") || parking[0] || null;
@@ -77,7 +80,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             .finally(() => active && setIsLoading(false));
 
         return () => { active = false; };
-    }, [currentUserId, isAdmin]);
+    }, [currentUserId]);
 
     const copySlotToForm = (space) => {
         setSlotForm({
