@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiRequest, saveSession } from "../lib/api";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -33,6 +34,8 @@ export default function Login({ onNavigate }) {
   const [resetErrors, setResetErrors] = useState({});
   const [resetMessage, setResetMessage] = useState(null);
   const [isResetLoading, setIsResetLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   const updateField = ({ target }) => {
     const { name, value, checked, type } = target;
@@ -48,7 +51,7 @@ export default function Login({ onNavigate }) {
     }));
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
 
     const next = {};
@@ -66,12 +69,22 @@ export default function Login({ onNavigate }) {
     }
 
     setErrors(next);
+    setServerError("");
 
     if (!Object.keys(next).length) {
-      console.info("EasyPark sign-in form validated", {
-        email: form.email,
-        remember: form.remember,
-      });
+      setIsSubmitting(true);
+      try {
+        const result = await apiRequest("/signin", {
+          method: "POST",
+          body: JSON.stringify({ identifier: form.email, password: form.password }),
+        });
+        saveSession(result.user);
+        onNavigate?.("home");
+      } catch (error) {
+        setServerError(error.message);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -167,6 +180,8 @@ export default function Login({ onNavigate }) {
               </p>
             </div>
 
+            {serverError && <div className="mb-1 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[11px] leading-5 text-red-700" role="alert">{serverError}</div>}
+
             <form
               className="grid gap-5"
               noValidate
@@ -253,9 +268,10 @@ export default function Login({ onNavigate }) {
 
               <button
                 type="submit"
-                className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600"
+                disabled={isSubmitting}
+                className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Sign in to EasyPark
+                {isSubmitting ? "Signing in…" : "Sign in to EasyPark"}
 
                 <Icon className="h-[18px] w-[18px]">
                   <path d="M5 12h13M13 6l6 6-6 6" />
