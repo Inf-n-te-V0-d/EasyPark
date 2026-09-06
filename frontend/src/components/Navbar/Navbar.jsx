@@ -2,9 +2,11 @@ import { useState } from "react";
 import Logo from "./Logo";
 import NavLinks from "./NavLinks";
 import ActionButtons from "./ActionButtons";
+import { getSession } from "../../lib/api";
 
 const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const signedInUser = getSession();
 
     const links = [
         { label: "Home", href: "#top", page: "home" },
@@ -13,7 +15,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         { label: "Contact", href: "#contact", page: "home" },
         { label: "Reservation", href: "#", page: "reservation" },
         { label: "Scan & Park", href: "#", page: "qr" },
-        { label: "My account", icon: "/user-account.svg", href: "#", page: "user" },
+        ...(!signedInUser?.name ? [{ label: "My account", icon: "/user-account.svg", href: "#", page: "user" }] : []),
     ];
 
     const scrollToTarget = (hash) => {
