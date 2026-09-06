@@ -92,5 +92,5 @@ Branch(Omika) : omika-feature
 Branch(Nethum) : nethum-feature-backend-routes  
 Branch(Nethum) : nethum-feature-Reservation-routes  
 Branch(Dilshan) : dilsha-feature   
-Branch(Milan)  : milan-map-integration
+Branch(Milan)  : milan-map-integration  
 Branch(Nethum) : nethum-feature-parking-routes
