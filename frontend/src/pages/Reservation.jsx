@@ -199,7 +199,6 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <strong>{parkedVehicleLocation.name}</strong>
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
-                        <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
                         <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
                         <input id="vehicle-number" value={vehicleNumber} onChange={(event) => setVehicleNumber(event.target.value)} placeholder="Enter vehicle number" className="scan-park-input mt-2 mb-4" maxLength={20} />
                         <dl className="reservation-details">
