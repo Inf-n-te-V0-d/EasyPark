@@ -2,14 +2,15 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const Parking = require("./models/Parking");
 
 const app = express();
 
 // routers
 // USER routes
-const userRouter = require("./routes/user/userRoutes");
-const userSignInRouter = require("./routes/user/userSigninRoutes");
-const userSignUpRouter = require("./routes/user/userSignupRoutes");
+const userRouter = require("./routes/User/userRoutes");
+const userSignInRouter = require("./routes/User/userSigninRoutes");
+const userSignUpRouter = require("./routes/User/userSignupRoutes");
 
 // RESERVATION routes
 const reservationRouter = require("./routes/reservation/reservationRoutes");
@@ -18,7 +19,7 @@ const reservationRouter = require("./routes/reservation/reservationRoutes");
 const parkingRouter = require("./routes/parking/parkingRoutes")
 
 // middleware
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL || true }));
 app.use(express.json());
 app.use((req, res, next) => {
   console.log("Middleware executed!");
@@ -34,6 +35,13 @@ app.use("/signin", userSignInRouter);
 app.use("/signup", userSignUpRouter);
 app.use("/reservation", reservationRouter);
 app.use("/parking", parkingRouter);
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+  });
+});
 
 
 
@@ -55,11 +63,28 @@ app.use("/parking", parkingRouter);
 // DB connection (Most suitable)
 async function startServer() {
   try {
-    await mongoose.connect(process.env.MONGO_LOCAL);
+    const mongoUri = process.env.MONGO_URI || process.env.MONGO_LOCAL || "mongodb://127.0.0.1:27017/easypark";
+    const port = Number(process.env.PORT) || 5000;
+
+    await mongoose.connect(mongoUri);
+
+    if (await Parking.countDocuments() === 0) {
+      await Parking.insertMany(
+        ["A-01", "A-02", "A-03", "A-04", "B-01", "B-02", "B-03", "B-04", "C-01", "C-02", "C-03", "C-04"].map((slot, index) => ({
+          slot,
+          floor: 1,
+          latitude: "6.9271",
+          longitude: "79.8612",
+          status: index % 4 === 2 ? "occupied" : "available",
+        })),
+      );
+      console.log("Seeded default parking slots.");
+    }
+
     console.log("Connected to Database!");
 
-    app.listen(process.env.PORT, () => {
-      console.log(`Listening on PORT ${process.env.PORT}.`);
+    app.listen(port, () => {
+      console.log(`Listening on PORT ${port}.`);
     });
   } catch (error) {
     console.error(`An error occurred, ${error}`);
@@ -67,4 +92,8 @@ async function startServer() {
   }
 }
 
-startServer();
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer };

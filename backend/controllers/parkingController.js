@@ -43,7 +43,7 @@ const addParking = async (req, res) => {
 const updateParking = async (req, res) => {
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.staus(404).json({ message: "No such ID found!" });
+    return res.status(400).json({ message: "Invalid parking ID." });
   }
   try {
     const parking = await Parking.findByIdAndUpdate(
@@ -54,7 +54,7 @@ const updateParking = async (req, res) => {
     if (!parking) {
       return res.status(404).json({ message: "Parking not found!" });
     }
-    res.staus(200).json(parking);
+    res.status(200).json(parking);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

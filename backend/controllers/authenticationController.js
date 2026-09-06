@@ -18,8 +18,9 @@ const signup = async (req, res) => {
 
     // Email and telephone check
 
+    const normalizedEmail = email.trim().toLowerCase();
     const exsitingUser = await User.findOne({
-      $or: [{ email }, { telephone }],
+      $or: [{ email: normalizedEmail }, { telephone: telephone.trim() }],
     });
     if (exsitingUser) {
       return res.status(409).json({
@@ -33,9 +34,9 @@ const signup = async (req, res) => {
     // Create user
     const user = new User({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
-      telephone,
+      telephone: telephone.trim(),
       vehicleDetails,
     });
     const savedUser = await user.save();
@@ -57,14 +58,15 @@ const signin = async (req, res) => {
         }
 
         // Find by email or telephone
+        const normalizedIdentifier = identifier.trim().toLowerCase();
         const user = await User.findOne({
             $or: [
-                {email: identifier},
-                {telephone: identifier},
+            {email: normalizedIdentifier},
+            {telephone: identifier.trim()},
             ]
         })
         if(!user){
-            return res.staus(401).json({message: "Invalid Credentials."})
+          return res.status(401).json({message: "Invalid credentials."})
         }
 
         const passwordMatch = await bcrypt.compare(
@@ -73,7 +75,7 @@ const signin = async (req, res) => {
         )
         if(!passwordMatch){
             return res.status(401).json({
-                message: "Invalid Password."
+                message: "Invalid credentials."
             })
         }
 

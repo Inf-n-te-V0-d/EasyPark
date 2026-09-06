@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
-
-const spaces = [
-    { id: "A-01", status: "available" }, { id: "A-02", status: "available" }, { id: "A-03", status: "occupied" }, { id: "A-04", status: "available" },
-    { id: "B-01", status: "occupied" }, { id: "B-02", status: "available" }, { id: "B-03", status: "available" }, { id: "B-04", status: "occupied" },
-    { id: "C-01", status: "available" }, { id: "C-02", status: "available" }, { id: "C-03", status: "occupied" }, { id: "C-04", status: "available" },
-];
+import { apiRequest, getSession } from "../lib/api";
 
 const parkedVehicleLocation = {
     name: "My parked vehicle",
@@ -15,8 +10,12 @@ const parkedVehicleLocation = {
 };
 
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
-    const [selectedSpace, setSelectedSpace] = useState("A-01");
+    const [spaces, setSpaces] = useState([]);
+    const [selectedSpace, setSelectedSpace] = useState(null);
     const [isReserved, setIsReserved] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         window.scrollTo({
@@ -26,13 +25,62 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         });
     }, []);
 
+    useEffect(() => {
+        let active = true;
+        apiRequest("/parking")
+            .then((parking) => {
+                if (!active) return;
+                setSpaces(parking);
+                setSelectedSpace(parking.find((space) => space.status === "available") || parking[0] || null);
+            })
+            .catch((requestError) => active && setError(requestError.message))
+            .finally(() => active && setIsLoading(false));
+
+        return () => { active = false; };
+    }, []);
+
     const chooseSpace = (space) => {
         if (space.status === "occupied") return;
-        setSelectedSpace(space.id);
+        setSelectedSpace(space);
         setIsReserved(false);
+        setError("");
     };
 
     const handleFindVehicle = () => onNavigate?.("tracking");
+
+    const reserveSpace = async () => {
+        const user = getSession();
+        if (!user?._id) {
+            setError("Please sign in before reserving a parking space.");
+            onNavigate?.("login");
+            return;
+        }
+        if (!selectedSpace) return;
+
+        const startTime = new Date();
+        const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+        setIsSaving(true);
+        setError("");
+        try {
+            await apiRequest("/reservation", {
+                method: "POST",
+                body: JSON.stringify({
+                    user: user._id,
+                    parkingSlot: selectedSpace._id,
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
+                    totalAmount: 0,
+                }),
+            });
+            setIsReserved(true);
+            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied" } : space));
+            setSelectedSpace((current) => current ? { ...current, status: "occupied" } : current);
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     return (
         <div className="reservation-page min-h-screen">
@@ -48,16 +96,17 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     <section className="reservation-card reservation-map-card" aria-labelledby="parking-map-title">
                         <div className="reservation-card-header">
                             <div><p className="reservation-label">Parking map</p><h2 id="parking-map-title">Level 1 · Main Building</h2></div>
-                            <span className="reservation-availability"><i /> 8 spaces available</span>
+                            <span className="reservation-availability"><i /> {spaces.filter((space) => space.status === "available").length} spaces available</span>
                         </div>
                         <div className="reservation-legend" aria-label="Parking map legend">
                             <span><i className="available" /> Available</span><span><i className="selected" /> Selected</span><span><i className="occupied" /> Occupied</span>
                         </div>
                         <div className="parking-lane" aria-hidden="true"><span>Entry</span><div /><span>Exit</span></div>
                         <div className="parking-spaces" role="list" aria-label="Available parking spaces">
-                            {spaces.map((space) => {
-                                const selected = selectedSpace === space.id;
-                                return <button key={space.id} type="button" role="listitem" disabled={space.status === "occupied"} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${selected ? "is-selected" : ""}`} aria-label={`${space.id}, ${selected ? "selected" : space.status}`}><span>P</span><b>{space.id}</b></button>;
+                            {isLoading && <p className="reservation-map-tip">Loading live parking availability...</p>}
+                            {!isLoading && spaces.map((space) => {
+                                const selected = selectedSpace?._id === space._id;
+                                return <button key={space._id} type="button" role="listitem" disabled={space.status === "occupied"} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${selected ? "is-selected" : ""}`} aria-label={`${space.slot}, ${selected ? "selected" : space.status}`}><span>P</span><b>{space.slot}</b></button>;
                             })}
                         </div>
                         <p className="reservation-map-tip">Tap an available space to select it.</p>
@@ -69,15 +118,16 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     <aside className="reservation-card reservation-summary" aria-labelledby="booking-title">
                         <p className="reservation-label">Your reservation</p>
                         <h2 id="booking-title">Review your spot</h2>
-                        <div className="selected-space-display"><span>Selected space</span><strong>{selectedSpace}</strong><em>Level 1 · Main Building</em></div>
+                        <div className="selected-space-display"><span>Selected space</span><strong>{selectedSpace?.slot || "No space selected"}</strong><em>Level {selectedSpace?.floor || 1} · Main Building</em></div>
                         <div className="reservation-vehicle-location">
                             <span className="reservation-location-label">Parked vehicle</span>
                             <strong>{parkedVehicleLocation.name}</strong>
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
                         <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
-                        <button type="button" className="reservation-button" onClick={() => setIsReserved(true)}>{isReserved ? "Space Reserved" : "Reserve this space"}</button>
-                        {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace} is reserved. See you soon!</p>}
+                        <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>
+                        {error && <p className="reservation-success" role="alert">{error}</p>}
+                        {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
                     </aside>
                 </div>
