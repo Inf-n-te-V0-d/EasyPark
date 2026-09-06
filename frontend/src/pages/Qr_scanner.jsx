@@ -3,6 +3,7 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import QRCode from "qrcode";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
 
 const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
@@ -129,6 +130,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         <div className="scan-park-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <main className="scan-park-main">
+                <BackButton onNavigate={onNavigate} />
                 <div className="scan-park-hero">
                     <span className="scan-park-eyebrow"><span className="scan-park-live-dot" /> EasyPark QR Hub</span>
                     <h1>Scan, park, <span>go.</span></h1>
