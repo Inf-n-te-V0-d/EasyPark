@@ -34,6 +34,9 @@ const Hero = ({ onNavigate }) => (
               <p>Track your parking in real time</p>
               <p>Reserve your space with QR</p>
               <p>Arrive, scan, and park with ease</p>
+              <p>Track your parking in real time</p>
+              <p>Reserve your space with QR</p>
+              <p>Arrive, scan, and park with ease</p>
             </div>
           </div>
           <div className="relative mt-6 flex justify-center gap-2"><span className="h-2 w-2 rounded-full bg-[#22C55E]" /><span className="h-2 w-2 rounded-full bg-white/30" /><span className="h-2 w-2 rounded-full bg-white/30" /></div>
