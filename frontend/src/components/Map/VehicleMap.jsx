@@ -1,39 +1,48 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
+import { getVehicleLocations, saveVehicleLocation } from "../../lib/api";
 import "./VehicleMap.css";
 
 const DEFAULT_VEHICLE = { lat: 6.92708, lng: 79.86124, slot: "A-01", floor: "Level 1", label: "Main Building" };
 const DEFAULT_USER = { lat: 6.92662, lng: 79.86008 };
 
-const readSavedVehicle = () => {
-    try {
-        const saved = JSON.parse(localStorage.getItem("easypark-vehicle-location"));
-        if (Number.isFinite(saved?.lat) && Number.isFinite(saved?.lng)) return { ...DEFAULT_VEHICLE, ...saved };
-    } catch {
-        // The tracker remains usable with its sample parking location.
-    }
-    return DEFAULT_VEHICLE;
+const readSavedVehicles = () => {
+    const saved = getVehicleLocations();
+    return saved.length ? saved.map((vehicle) => ({ ...DEFAULT_VEHICLE, ...vehicle })) : [{ ...DEFAULT_VEHICLE, id: "default-vehicle" }];
 };
 
 const formatDistance = (meters) => meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
-const formatDuration = (seconds) => `${Math.max(1, Math.round(seconds / 60))} min walk`;
+const formatDuration = (seconds) => {
+    const totalMinutes = Math.max(1, Math.round(seconds / 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return hours ? `${hours} h ${minutes} min walk` : `${minutes} min walk`;
+};
+const estimateWalkingRoute = (start, end) => {
+    const earthRadius = 6371000;
+    const latitudeDelta = (end.lat - start.lat) * Math.PI / 180;
+    const longitudeDelta = (end.lng - start.lng) * Math.PI / 180;
+    const distance = 2 * earthRadius * Math.asin(Math.sqrt(
+        Math.sin(latitudeDelta / 2) ** 2
+        + Math.cos(start.lat * Math.PI / 180) * Math.cos(end.lat * Math.PI / 180) * Math.sin(longitudeDelta / 2) ** 2,
+    ));
+    return { distance: distance * 1.25, duration: (distance * 1.25) / 1.35 };
+};
 
 const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
-    const [vehicle, setVehicle] = useState(readSavedVehicle);
+    const [vehicles, setVehicles] = useState(readSavedVehicles);
+    const [vehicle, setVehicle] = useState(() => readSavedVehicles()[0]);
     const [userLocation, setUserLocation] = useState(DEFAULT_USER);
-    const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
+    const [routeInfo, setRouteInfo] = useState(() => estimateWalkingRoute(DEFAULT_USER, readSavedVehicles()[0]));
     const [status, setStatus] = useState("Ready to locate you");
     const [isLocating, setIsLocating] = useState(false);
     const [routeError, setRouteError] = useState("");
+    const liveNavigationUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${vehicle.lat},${vehicle.lng}`)}&travelmode=walking`;
 
     const googleMapsEmbedUrl = useMemo(() => {
         const origin = `${userLocation.lat},${userLocation.lng}`;
         const destination = `${vehicle.lat},${vehicle.lng}`;
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (apiKey) {
-            return `https://www.google.com/maps/embed/v1/directions?key=${encodeURIComponent(apiKey)}&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&mode=walking`;
-        }
         return `https://www.google.com/maps?output=embed&f=d&saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}&dirflg=w`;
     }, [userLocation, vehicle]);
 
@@ -41,8 +50,8 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         setRouteError("");
         const key = import.meta.env.VITE_ORS_API_KEY;
         if (!key) {
-            setRouteInfo({ distance: 0, duration: 0 });
-            setRouteError("Add VITE_ORS_API_KEY to show route distance and walking time.");
+            setRouteInfo(estimateWalkingRoute(start, end));
+            setRouteError("Showing an approximate walking estimate.");
             return;
         }
 
@@ -58,8 +67,8 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             if (!feature) throw new Error("No route was returned");
             setRouteInfo(feature.properties.summary);
         } catch {
-            setRouteInfo({ distance: 0, duration: 0 });
-            setRouteError("Route details are unavailable right now.");
+            setRouteInfo(estimateWalkingRoute(start, end));
+            setRouteError("Route service unavailable; showing an approximate walking estimate.");
         }
     }, []);
 
@@ -88,10 +97,16 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }, [getRoute, userLocation, vehicle]);
 
     const saveCurrentPosition = () => {
-        const nextVehicle = { ...userLocation, slot: vehicle.slot, floor: vehicle.floor, label: "Saved vehicle location" };
+        const nextVehicle = saveVehicleLocation({ ...vehicle, ...userLocation, label: "Saved vehicle location" });
+        setVehicles((current) => current.map((item) => item.id === vehicle.id ? nextVehicle : item));
         setVehicle(nextVehicle);
-        localStorage.setItem("easypark-vehicle-location", JSON.stringify(nextVehicle));
         setStatus("Vehicle location saved on this device");
+        getRoute(userLocation, nextVehicle);
+    };
+
+    const selectVehicle = (nextVehicle) => {
+        setVehicle(nextVehicle);
+        setStatus(`Showing ${nextVehicle.label || "selected vehicle"}`);
         getRoute(userLocation, nextVehicle);
     };
 
@@ -117,6 +132,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     </div>
 
                     <aside className="tracking-panel">
+                        {vehicles.length > 1 && <div className="tracking-vehicle-list" aria-label="Saved vehicle locations"><span>Saved vehicles</span>{vehicles.map((savedVehicle, index) => <button type="button" key={savedVehicle.id} className={savedVehicle.id === vehicle.id ? "is-active" : ""} onClick={() => selectVehicle(savedVehicle)}>{savedVehicle.label || `Vehicle ${index + 1}`} · {savedVehicle.slot || "Saved location"}</button>)}</div>}
                         <div className="tracking-status"><span className="tracking-status-dot" /> {status}</div>
                         <div className="tracking-destination"><span>Parked at</span><strong>{vehicle.label}</strong><div className="tracking-parking-details"><div><small>Slot</small><b>{vehicle.slot}</b></div><div><small>Floor</small><b>{vehicle.floor}</b></div></div><small>{vehicle.lat.toFixed(5)}, {vehicle.lng.toFixed(5)}</small></div>
                         <div className="tracking-stats">
@@ -124,6 +140,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <div><span>Walking time</span><strong>{hasRouteSummary ? formatDuration(routeInfo.duration) : "—"}</strong></div>
                         </div>
                         <button type="button" className="tracking-button" onClick={locateUser} disabled={isLocating}>{isLocating ? "Locating you…" : "Use my live location"}</button>
+                        <a className="tracking-button tracking-navigation-button" href={liveNavigationUrl} target="_blank" rel="noreferrer" aria-label="Open live navigation to your vehicle">Open live navigation</a>
                         <button type="button" className="tracking-button tracking-button-secondary" onClick={saveCurrentPosition}>Save this as my vehicle location</button>
                         {routeError && <p className="tracking-help" role="status">{routeError}</p>}
                         <p className="tracking-help">Tip: after scanning at your bay, save the vehicle location once. It will be here when you return.</p>

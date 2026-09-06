@@ -1,4 +1,5 @@
 const express = require("express");
+const { requireAuth } = require("../../middleware/authMiddleware");
 const {
     getReservations,
     getReservation,
@@ -11,9 +12,9 @@ const {
 const router = express.Router();
 
 router.get("/", getReservations);
-router.get("/user/:userId", getReservationsByUser);
+router.get("/user/:userId", requireAuth, getReservationsByUser);
 router.get("/:id", getReservation);
-router.post("/", addReservation);
+router.post("/", requireAuth, addReservation);
 router.put("/:id", updateReservation);
 router.delete("/:id", deleteReservation);
 
