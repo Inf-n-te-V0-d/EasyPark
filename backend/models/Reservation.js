@@ -24,7 +24,11 @@ const reservationSchema = new mongoose.Schema({
         required: true,
     },
     vehicleDetails:{
-        vehicleNumber: String,
+        vehicleNumber: {
+            type: String,
+            required: [true, "Vehicle number is required."],
+            trim: true,
+        },
         prefix: String,
         suffix: String
     },
