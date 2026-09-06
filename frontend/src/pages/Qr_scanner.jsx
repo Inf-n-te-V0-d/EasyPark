@@ -3,10 +3,14 @@ import { Html5QrcodeScanner } from "html5-qrcode";
 import QRCode from "qrcode";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
 
 const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
-    const userType = "staff"; // change to "staff" or "user"(another role) to show generator + scanner
-    const showGenerator = userType !== "user";
+    const session = getSession();
+    const userId = session?._id;
+    const token = session?.token;
+    const [isAdmin, setIsAdmin] = useState(() => String(session?.role || session?.userType || "").toLowerCase() === "admin");
+    const showGenerator = isAdmin;
     const [qrText, setQrText] = useState("");
     const [qrDataUrl, setQrDataUrl] = useState("");
     const [scanResult, setScanResult] = useState("No QR scanned yet");
@@ -22,6 +26,14 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             }
         };
     }, []);
+
+    useEffect(() => {
+        if (!userId || !token) return;
+
+        apiRequest(`/users/${userId}`)
+            .then((user) => setIsAdmin(String(user.role || user.userType || "").toLowerCase() === "admin"))
+            .catch(() => null);
+    }, [token, userId]);
 
     const generateQR = async () => {
         if (!qrText.trim()) {
@@ -100,13 +112,13 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             if (!Number.isFinite(location.lat) || !Number.isFinite(location.lng)) {
                 throw new Error("Missing coordinates");
             }
-            localStorage.setItem("easypark-vehicle-location", JSON.stringify({
+            saveVehicleLocation({
                 lat: location.lat,
                 lng: location.lng,
                 label: location.label || location.slot || "Scanned parking location",
                 slot: location.slot || "—",
                 floor: location.floor || location.level || "—",
-            }));
+            });
             onNavigate?.("tracking");
         } catch {
             alert("This QR code does not contain a parking location. Use JSON such as {\"lat\":6.9271,\"lng\":79.8612,\"slot\":\"A-01\",\"floor\":\"Level 1\"}.");
@@ -121,7 +133,9 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     <span className="scan-park-eyebrow"><span className="scan-park-live-dot" /> EasyPark QR Hub</span>
                     <h1>Scan, park, <span>go.</span></h1>
                     <p>
-                        Generate a parking QR code or scan one in seconds. Everything you need for a smoother arrival is right here.
+                        {showGenerator
+                            ? "Generate and share parking QR codes for your facility, or scan one to check a vehicle location in seconds."
+                            : "Scan your parking QR code in seconds to check in and find your vehicle location when you are ready to leave."}
                     </p>
                 </div>
 

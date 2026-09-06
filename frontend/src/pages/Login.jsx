@@ -30,7 +30,7 @@ export default function Login({ onNavigate }) {
   const [showPassword, setShowPassword] = useState(false);
   const [authView, setAuthView] = useState("login");
   const [resetStep, setResetStep] = useState("request");
-  const [resetForm, setResetForm] = useState({ email: "", code: "", password: "", confirmPassword: "" });
+  const [resetForm, setResetForm] = useState({ identifier: "", code: "", password: "", confirmPassword: "" });
   const [resetErrors, setResetErrors] = useState({});
   const [resetMessage, setResetMessage] = useState(null);
   const [isResetLoading, setIsResetLoading] = useState(false);
@@ -78,7 +78,7 @@ export default function Login({ onNavigate }) {
           method: "POST",
           body: JSON.stringify({ identifier: form.email, password: form.password }),
         });
-        saveSession(result.user);
+        saveSession(result.user, result.token);
         onNavigate?.("home");
       } catch (error) {
         setServerError(error.message);
@@ -91,7 +91,7 @@ export default function Login({ onNavigate }) {
   const openReset = () => {
     setAuthView("reset");
     setResetStep("request");
-    setResetForm({ email: form.email, code: "", password: "", confirmPassword: "" });
+    setResetForm({ identifier: form.email, code: "", password: "", confirmPassword: "" });
     setResetErrors({});
     setResetMessage(null);
   };
@@ -103,25 +103,31 @@ export default function Login({ onNavigate }) {
     setResetMessage(null);
   };
 
-  const requestVerificationCode = (event) => {
+  const requestVerificationCode = async (event) => {
     event.preventDefault();
     const next = {};
-    if (!resetForm.email.trim()) next.email = "Email address is required.";
-    else if (!emailPattern.test(resetForm.email)) next.email = "Enter a valid email address.";
+    if (!resetForm.identifier.trim()) next.identifier = "Email or telephone number is required.";
     setResetErrors(next);
     if (Object.keys(next).length) {
       setResetMessage({ type: "error", text: "Please correct the highlighted field." });
       return;
     }
     setIsResetLoading(true);
-    window.setTimeout(() => {
+    try {
+      await apiRequest("/users/password-reset/request", {
+        method: "POST",
+        body: JSON.stringify({ identifier: resetForm.identifier }),
+      });
       setIsResetLoading(false);
       setResetStep("reset");
-      setResetMessage({ type: "success", text: "A verification code has been sent to your email." });
-    }, 700);
+      setResetMessage({ type: "success", text: "Your request was sent to an administrator. The OTP will be delivered manually." });
+    } catch (error) {
+      setResetMessage({ type: "error", text: error.message });
+      setIsResetLoading(false);
+    }
   };
 
-  const completeReset = (event) => {
+  const completeReset = async (event) => {
     event.preventDefault();
     const next = {};
     if (!/^\d{6}$/.test(resetForm.code)) next.code = "Enter the 6-digit verification code.";
@@ -135,11 +141,18 @@ export default function Login({ onNavigate }) {
       return;
     }
     setIsResetLoading(true);
-    window.setTimeout(() => {
+    try {
+      await apiRequest("/users/password-reset/complete", {
+        method: "POST",
+        body: JSON.stringify({ identifier: resetForm.identifier, otp: resetForm.code, newPassword: resetForm.password }),
+      });
       setIsResetLoading(false);
       setResetStep("success");
       setResetMessage({ type: "success", text: "Your password has been reset. You can now sign in with it." });
-    }, 900);
+    } catch (error) {
+      setResetMessage({ type: "error", text: error.message });
+      setIsResetLoading(false);
+    }
   };
 
   const returnToLogin = () => {
@@ -288,19 +301,19 @@ export default function Login({ onNavigate }) {
                   {resetStep === "success" ? "Password reset" : "Reset password"}<span className="text-green-500">.</span>
                 </h1>
                 <p className="mt-2 text-[13px] leading-6 text-slate-700">
-                  {resetStep === "request" ? "Enter your email and we’ll send you a verification code." : resetStep === "reset" ? "Enter your code and choose a new secure password." : "Your EasyPark account is ready to use."}
+                  {resetStep === "request" ? "Enter your email or phone. An administrator will send the OTP manually." : resetStep === "reset" ? "Enter the OTP sent by the administrator and choose a new password." : "Your EasyPark account is ready to use."}
                 </p>
               </div>
 
               {resetMessage && <div className={`mb-5 rounded-xl border px-4 py-3 text-[11px] leading-5 ${resetMessage.type === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-green-200 bg-green-50 text-green-700"}`} role={resetMessage.type === "error" ? "alert" : "status"} aria-live="polite">{resetMessage.text}</div>}
 
               {resetStep === "request" && <form className="grid gap-5" noValidate onSubmit={requestVerificationCode}>
-                <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>Email address</span><input className={input} name="email" type="email" autoComplete="email" placeholder="you@example.com" value={resetForm.email} onChange={updateResetField} aria-invalid={Boolean(resetErrors.email)} />{resetErrors.email && <small className="text-[10px] font-medium text-red-600">{resetErrors.email}</small>}</label>
-                <button type="submit" disabled={isResetLoading} className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70">{isResetLoading ? "Sending code…" : "Send verification code"}<Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon></button>
+                <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>Email or telephone number</span><input className={input} name="identifier" type="text" autoComplete="username" placeholder="you@example.com or phone number" value={resetForm.identifier} onChange={updateResetField} aria-invalid={Boolean(resetErrors.identifier)} />{resetErrors.identifier && <small className="text-[10px] font-medium text-red-600">{resetErrors.identifier}</small>}</label>
+                <button type="submit" disabled={isResetLoading} className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70">{isResetLoading ? "Sending request…" : "Request OTP from admin"}<Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon></button>
               </form>}
 
               {resetStep === "reset" && <form className="grid gap-5" noValidate onSubmit={completeReset}>
-                <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>Verification code</span><input className={input} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength="6" pattern="[0-9]{6}" placeholder="6-digit code" value={resetForm.code} onChange={updateResetField} aria-invalid={Boolean(resetErrors.code)} aria-describedby="verification-code-help" />{resetErrors.code && <small className="text-[10px] font-medium text-red-600">{resetErrors.code}</small>}<small id="verification-code-help" className="font-normal text-[10px] text-slate-500">Frontend preview: enter any 6 digits.</small></label>
+                <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>Administrator OTP</span><input className={input} name="code" inputMode="numeric" autoComplete="one-time-code" maxLength="6" pattern="[0-9]{6}" placeholder="6-digit code" value={resetForm.code} onChange={updateResetField} aria-invalid={Boolean(resetErrors.code)} />{resetErrors.code && <small className="text-[10px] font-medium text-red-600">{resetErrors.code}</small>}<small className="font-normal text-[10px] text-slate-500">Ask the administrator to send the OTP to you.</small></label>
                 <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>New password</span><input className={input} name="password" type="password" autoComplete="new-password" placeholder="At least 6 characters" value={resetForm.password} onChange={updateResetField} aria-invalid={Boolean(resetErrors.password)} />{resetErrors.password && <small className="text-[10px] font-medium text-red-600">{resetErrors.password}</small>}</label>
                 <label className="grid gap-2 text-[12px] font-semibold text-slate-900"><span>Confirm new password</span><input className={input} name="confirmPassword" type="password" autoComplete="new-password" placeholder="Re-enter your new password" value={resetForm.confirmPassword} onChange={updateResetField} aria-invalid={Boolean(resetErrors.confirmPassword)} />{resetErrors.confirmPassword && <small className="text-[10px] font-medium text-red-600">{resetErrors.confirmPassword}</small>}</label>
                 <button type="submit" disabled={isResetLoading} className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70">{isResetLoading ? "Resetting password…" : "Reset password"}<Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon></button>
