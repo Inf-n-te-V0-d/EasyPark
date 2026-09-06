@@ -303,12 +303,12 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         <dl className="reservation-details reservation-arrival-details">
                             <div>
                                 <dt>Arrival date</dt>
-                                <dd><input type="date" value={arrivalDate} min={getToday()} onChange={(event) => setArrivalDate(event.target.value)} /></dd>
+                                <dd className="reservation-date-selector"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M8 3v4m8-4v4M3 10h18" /></svg><input type="date" value={arrivalDate} min={getToday()} onChange={(event) => setArrivalDate(event.target.value)} /></dd>
                             </div>
                             <div className="reservation-time-range">
-                                <label><span>From</span><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></label>
+                                <label className="reservation-time-selector"><span>From</span><div><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></div></label>
                                 <span aria-hidden="true">-</span>
-                                <label><span>To</span><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></label>
+                                <label className="reservation-time-selector"><span>To</span><div><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></div></label>
                             </div>
                             <div><dt>Duration</dt><dd>{durationMinutes ? formatDuration(durationMinutes) : "Choose a valid time range"}</dd></div>
                         </dl>
