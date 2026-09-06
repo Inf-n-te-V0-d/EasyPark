@@ -46,9 +46,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [adminAction, setAdminAction] = useState("edit");
     const [adminMessage, setAdminMessage] = useState("");
     const [activeFloor, setActiveFloor] = useState(1);
-    const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
-    const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
-    const durationMinutes = Number.isFinite(startDateTime.getTime()) && Number.isFinite(endDateTime.getTime()) && endDateTime > startDateTime
+    //const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
+    //const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
+    //const durationMinutes = Number.isFinite(startDateTime.getTime()) && Number.isFinite(endDateTime.getTime()) && endDateTime > startDateTime
 
     const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
     const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
