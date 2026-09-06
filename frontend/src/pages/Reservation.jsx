@@ -31,6 +31,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
+    const [vehicleNumber, setVehicleNumber] = useState("");
     const [arrivalDate, setArrivalDate] = useState(todayForInput);
     const [arrivalStart, setArrivalStart] = useState("09:00");
     const [arrivalEnd, setArrivalEnd] = useState("11:00");
@@ -109,6 +110,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             return;
         }
         if (!selectedSpace) return;
+        if (!vehicleNumber.trim()) {
+            setError("Please enter your vehicle number before reserving.");
+            return;
+        }
 
         if (!durationMinutes) {
             setError("Choose a valid arrival time range.");
@@ -122,6 +127,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 body: JSON.stringify({
                     user: user._id,
                     parkingSlot: selectedSpace._id,
+                    vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
                     startTime: startDateTime.toISOString(),
                     endTime: endDateTime.toISOString(),
                     totalAmount: 0,
@@ -191,6 +199,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <strong>{parkedVehicleLocation.name}</strong>
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
+                        <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
+                        <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
+                        <input id="vehicle-number" value={vehicleNumber} onChange={(event) => setVehicleNumber(event.target.value)} placeholder="Enter vehicle number" className="scan-park-input mt-2 mb-4" maxLength={20} />
                         <dl className="reservation-details">
                             <div>
                                 <dt>Arrival window</dt>

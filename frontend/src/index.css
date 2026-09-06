@@ -413,6 +413,7 @@ html.dark .auth-visual-copy {
 .scan-park-button-primary:hover { background: var(--color-primary-hover); box-shadow: 0 12px 23px rgba(34,197,94,.3); }
 .scan-park-button-secondary { border-color: var(--color-border); background: transparent; color: var(--color-dark); }
 .scan-park-button-secondary:hover { border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+.scan-qr-reservation-form { margin-top: 1rem; border-top: 1px solid var(--color-border); padding-top: 1rem; }
 .scan-park-qr-preview { display: grid; min-height: 15.25rem; margin-top: 1.45rem; place-items: center; overflow: hidden; border: 1px dashed color-mix(in srgb, var(--color-primary) 32%, var(--color-border)); border-radius: 18px; padding: 1.25rem; background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 7%, var(--color-background)), var(--color-background)); }
 .scan-park-qr-preview img { width: min(100%, 13.75rem); height: auto; border-radius: .3rem; box-shadow: 0 12px 25px rgba(15,23,42,.13); animation: scan-park-enter .35s ease-out both; }
 .scan-park-empty-qr { color: var(--color-text); text-align: center; font-size: .83rem; }

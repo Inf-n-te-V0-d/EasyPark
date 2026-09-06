@@ -24,6 +24,7 @@ const reservationSchema = new mongoose.Schema({
         required: true,
     },
     vehicleDetails:{
+        vehicleNumber: String,
         prefix: String,
         suffix: String
     },
