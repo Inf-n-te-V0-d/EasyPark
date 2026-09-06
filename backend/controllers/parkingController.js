@@ -2,6 +2,14 @@ const Parking = require("../models/Parking");
 const Reservation = require("../models/Reservation");
 const mongoose = require("mongoose");
 
+const parkingFields = ({ slot, floor, latitude, longitude, status }) => ({
+  slot: typeof slot === "string" ? slot.trim().toUpperCase() : slot,
+  floor: Number(floor),
+  latitude: String(latitude).trim(),
+  longitude: String(longitude).trim(),
+  ...(status ? { status } : {}),
+});
+
 //GET all parkings
 const getParkings = async (req, res) => {
   try {
@@ -32,7 +40,15 @@ const getParking = async (req, res) => {
 // ADD a parking
 const addParking = async (req, res) => {
   try {
-    const parking = new Parking(req.body);
+    const details = parkingFields(req.body);
+    if (!details.slot || !Number.isFinite(details.floor) || !Number.isFinite(Number(details.latitude)) || !Number.isFinite(Number(details.longitude))) {
+      return res.status(400).json({ message: "Slot, floor, latitude, and longitude are required." });
+    }
+    const duplicate = await Parking.findOne({ slot: details.slot, floor: details.floor });
+    if (duplicate) {
+      return res.status(409).json({ message: "A parking slot with this name already exists on that floor." });
+    }
+    const parking = new Parking(details);
     const savedParking = await parking.save();
     res.status(200).json(savedParking);
   } catch (error) {
@@ -47,9 +63,17 @@ const updateParking = async (req, res) => {
     return res.status(400).json({ message: "Invalid parking ID." });
   }
   try {
+    const details = parkingFields(req.body);
+    if (!details.slot || !Number.isFinite(details.floor) || !Number.isFinite(Number(details.latitude)) || !Number.isFinite(Number(details.longitude))) {
+      return res.status(400).json({ message: "Slot, floor, latitude, and longitude are required." });
+    }
+    const duplicate = await Parking.findOne({ slot: details.slot, floor: details.floor, _id: { $ne: id } });
+    if (duplicate) {
+      return res.status(409).json({ message: "A parking slot with this name already exists on that floor." });
+    }
     const parking = await Parking.findByIdAndUpdate(
       id,
-      { ...req.body },
+      details,
       { new: true, runValidators: true },
     );
     if (!parking) {
@@ -68,6 +92,13 @@ const deleteParking = async (req, res) => {
     return res.status(404).json({ message: "No sucj ID found!" });
   }
   try {
+    const activeReservation = await Reservation.exists({
+      parkingSlot: id,
+      status: { $in: ["pending", "confirmed", "checked-in"] },
+    });
+    if (activeReservation) {
+      return res.status(409).json({ message: "Release the active reservation before deleting this parking slot." });
+    }
     const parking = await Parking.findByIdAndDelete(id);
     if (!parking) {
       return res.status(404).json({ message: "Parking not found!" });
