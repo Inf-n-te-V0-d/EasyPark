@@ -30,6 +30,11 @@ const parkingSchema = new mongoose.Schema(
             "available"
         ],
         default : "available"
+    },
+    vehicleNumber : {
+        type : String,
+        trim: true,
+        default: ""
     }
 
   },
