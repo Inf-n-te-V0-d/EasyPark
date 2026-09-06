@@ -36,6 +36,11 @@ const addReservation = async (req, res) => {
   try {
     const { parkingSlot, startTime, endTime, vehicleDetails = {}, totalAmount = 0 } = req.body;
     const user = req.user._id;
+    const vehicleNumber = String(vehicleDetails.vehicleNumber || "").trim();
+
+    if (!vehicleNumber) {
+      return res.status(400).json({ message: "Vehicle number is required." });
+    }
 
     if (!mongoose.Types.ObjectId.isValid(user) || !mongoose.Types.ObjectId.isValid(parkingSlot)) {
       return res.status(400).json({ message: "Valid user and parking slot are required." });
@@ -65,7 +70,7 @@ const addReservation = async (req, res) => {
       parkingSlot,
       startTime: start,
       endTime: end,
-      vehicleDetails,
+      vehicleDetails: { ...vehicleDetails, vehicleNumber },
       totalAmount: Number(totalAmount) || 0,
       pin: String(Math.floor(100000 + Math.random() * 900000)),
       status: "confirmed",
