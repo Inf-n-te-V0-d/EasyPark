@@ -103,6 +103,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }, [getRoute, userId]);
 
     const locateUser = useCallback(() => {
+        if (!vehicle) return;
         if (!navigator.geolocation) {
             setStatus("Location services are not supported by this browser");
             return;
@@ -146,6 +147,9 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }, []); // Initial preview route only.
 
     const hasRouteSummary = routeInfo.distance > 0;
+    const liveNavigationUrl = vehicle
+        ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${vehicle.lat},${vehicle.lng}`)}&travelmode=walking`
+        : "#";
     return (
         <div className="tracking-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
@@ -169,14 +173,14 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         {!isLoadingVehicles && !vehicle && <p className="tracking-help">No active reserved vehicles found. Reserve a parking slot to see it here.</p>}
                         {vehicle && <>
                         <div className="tracking-status"><span className="tracking-status-dot" /> {status}</div>
-                        <div className="tracking-destination"><span>Parked at</span><strong>{vehicle.label}</strong><div className="tracking-parking-details"><div><small>Slot</small><b>{vehicle.slot}</b></div><div><small>Floor</small><b>{vehicle.floor}</b></div></div><small>{vehicle.lat.toFixed(5)}, {vehicle.lng.toFixed(5)}</small></div>
+                        {vehicle && <><div className="tracking-destination"><span>Parked at</span><strong>{vehicle.label}</strong><div className="tracking-parking-details"><div><small>Slot</small><b>{vehicle.slot}</b></div><div><small>Floor</small><b>{vehicle.floor}</b></div></div><small>{vehicle.lat.toFixed(5)}, {vehicle.lng.toFixed(5)}</small></div>
                         <div className="tracking-stats">
                             <div><span>Distance</span><strong>{hasRouteSummary ? formatDistance(routeInfo.distance) : "—"}</strong></div>
                             <div><span>Walking time</span><strong>{hasRouteSummary ? formatDuration(routeInfo.duration) : "—"}</strong></div>
                         </div>
                         <button type="button" className="tracking-button" onClick={locateUser} disabled={isLocating}>{isLocating ? "Locating you…" : "Use my live location"}</button>
                         <a className="tracking-button tracking-navigation-button" href={liveNavigationUrl} target="_blank" rel="noreferrer" aria-label="Open live navigation to your vehicle">Open live navigation</a>
-                        <button type="button" className="tracking-button tracking-button-secondary" onClick={saveCurrentPosition}>Save this as my vehicle location</button>
+                        <button type="button" className="tracking-button tracking-button-secondary" onClick={saveCurrentPosition}>Save this as my vehicle location</button></>}
                         {routeError && <p className="tracking-help" role="status">{routeError}</p>}
                         <p className="tracking-help">Tip: after scanning at your bay, save the vehicle location once. It will be here when you return.</p>
                         </>}

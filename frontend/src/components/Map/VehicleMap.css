@@ -9,6 +9,7 @@
 .tracking-heading p { max-width: 40rem; margin: 0; color: var(--color-text); line-height: 1.75; }
 .tracking-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(19rem, .7fr); gap: 1.35rem; align-items: stretch; }
 .tracking-map-card, .tracking-panel { overflow: hidden; border: 1px solid var(--color-border); border-radius: 18px; background: var(--color-white); box-shadow: 0 18px 46px rgba(15, 23, 42, .07); }
+.tracking-empty-state { display: grid; min-height: 33rem; place-items: center; padding: 2rem; color: var(--color-text); font-size: .9rem; text-align: center; }
 .tracking-map { display: block; min-height: 33rem; width: 100%; border: 0; }
 .tracking-map-key { display: flex; flex-wrap: wrap; gap: 1rem; padding: .9rem 1.15rem; border-top: 1px solid var(--color-border); color: var(--color-text); font-size: .75rem; font-weight: 600; }
 .tracking-map-key span { display: inline-flex; align-items: center; gap: .4rem; }.tracking-map-key i { width: .72rem; height: .72rem; border-radius: 50%; }.tracking-key-user { border: 3px solid #fff; background: #22C55E; box-shadow: 0 0 0 1px #22C55E; }.tracking-key-vehicle { background: #0F172A; }
