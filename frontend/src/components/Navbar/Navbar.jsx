@@ -13,6 +13,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         { label: "Contact", href: "#contact", page: "home" },
         { label: "Reservation", href: "#", page: "reservation" },
         { label: "Scan & Park", href: "#", page: "qr" },
+        { label: "My account", icon: "/user-account.svg", href: "#", page: "user" },
     ];
 
     const scrollToTarget = (hash) => {
@@ -26,7 +27,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     };
 
     const handleLinkClick = (link, event) => {
-        if (link.page === "qr" || link.page === "reservation" || link.page === "tracking") {
+        if (link.page === "qr" || link.page === "reservation" || link.page === "tracking" || link.page === "user") {
             event.preventDefault();
             onNavigate?.(link.page);
         } else if (link.href?.startsWith("#")) {
@@ -45,13 +46,13 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-10">
                 <Logo />
 
-                <div className="hidden min-[1220px]:flex items-center gap-10">
+                <div className="hidden min-[1280px]:flex min-w-0 items-center gap-5">
                     <NavLinks links={links} onLinkClick={handleLinkClick} />
-                    <ActionButtons onNavigate={onNavigate} />
+                    <ActionButtons className="shrink-0 gap-2" onNavigate={onNavigate} />
                     <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                 </div>
 
-                <div className="flex items-center gap-2 min-[1220px]:hidden">
+                <div className="flex items-center gap-2 min-[1280px]:hidden">
                     <ThemeToggle isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                     <button
                         type="button"
@@ -70,7 +71,7 @@ const Navbar = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             </div>
 
             <div
-                className={`mobile-nav fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-auto bg-white px-6 pb-6 pt-6 shadow-2xl min-[1220px]:hidden transition-all duration-300 ease-in-out ${
+                className={`mobile-nav fixed inset-x-0 top-20 z-40 min-h-[calc(100vh-5rem)] overflow-y-auto bg-[var(--color-background)] px-6 pb-8 pt-6 shadow-2xl min-[1280px]:hidden transition-all duration-300 ease-in-out ${
                     isMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0 pointer-events-none"
                 }`}
                 style={{ visibility: isMenuOpen ? "visible" : "hidden" }}

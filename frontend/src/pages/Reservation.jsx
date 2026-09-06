@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
-import { apiRequest, getSession } from "../lib/api";
+import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
 
 const parkedVehicleLocation = {
     name: "My parked vehicle",
@@ -9,8 +9,14 @@ const parkedVehicleLocation = {
     link: "https://www.google.com/maps/dir/?api=1&destination=6.9271,79.8612&travelmode=driving",
 };
 
+const getReservationSlotId = (reservation) => String(reservation.parkingSlot?._id || reservation.parkingSlot || "");
+
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
+    const currentUser = getSession();
+    const currentUserId = currentUser?._id;
+    const isAdmin = currentUser?.role === "admin";
     const [spaces, setSpaces] = useState([]);
+    const [myReservations, setMyReservations] = useState([]);
     const [selectedSpace, setSelectedSpace] = useState(null);
     const [isReserved, setIsReserved] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,26 +33,55 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     useEffect(() => {
         let active = true;
-        apiRequest("/parking")
-            .then((parking) => {
+        Promise.all([
+            apiRequest("/parking"),
+            currentUserId ? apiRequest(`/reservation/user/${currentUserId}`) : Promise.resolve([]),
+        ])
+            .then(([parking, reservations]) => {
                 if (!active) return;
                 setSpaces(parking);
-                setSelectedSpace(parking.find((space) => space.status === "available") || parking[0] || null);
+                setMyReservations(reservations.filter((reservation) => reservation.status !== "cancelled"));
+                const ownedSlotIds = new Set(reservations.filter((reservation) => reservation.status !== "cancelled").map(getReservationSlotId));
+                setSelectedSpace(parking.find((space) => space.status === "available") || parking.find((space) => ownedSlotIds.has(String(space._id))) || parking[0] || null);
             })
             .catch((requestError) => active && setError(requestError.message))
             .finally(() => active && setIsLoading(false));
 
         return () => { active = false; };
-    }, []);
+    }, [currentUserId, isAdmin]);
 
     const chooseSpace = (space) => {
-        if (space.status === "occupied") return;
+        const isMine = myReservations.some((reservation) => getReservationSlotId(reservation) === String(space._id));
+        if (space.status === "occupied" && !isMine && !isAdmin) return;
         setSelectedSpace(space);
         setIsReserved(false);
         setError("");
     };
 
     const handleFindVehicle = () => onNavigate?.("tracking");
+
+    const releaseSpace = async (space) => {
+        const user = getSession();
+        if (!user?._id) {
+            setError("Please sign in before releasing a parking space.");
+            onNavigate?.("login");
+            return;
+        }
+
+        setIsSaving(true);
+        setError("");
+        try {
+            await apiRequest(`/parking/${space._id}/release`, { method: "POST" });
+            setSpaces((current) => current.map((item) => item._id === space._id ? { ...item, status: "available" } : item));
+            setMyReservations((current) => current.filter((reservation) => getReservationSlotId(reservation) !== String(space._id)));
+            setSelectedSpace((current) => current?._id === space._id ? { ...current, status: "available" } : current);
+            setIsReserved(false);
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     const reserveSpace = async () => {
         const user = getSession();
@@ -72,6 +107,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     totalAmount: 0,
                 }),
             });
+            if (Number.isFinite(Number(selectedSpace.latitude)) && Number.isFinite(Number(selectedSpace.longitude))) {
+                saveVehicleLocation({
+                    lat: Number(selectedSpace.latitude),
+                    lng: Number(selectedSpace.longitude),
+                    label: `Reserved vehicle · ${selectedSpace.slot}`,
+                    slot: selectedSpace.slot,
+                    floor: `Level ${selectedSpace.floor}`,
+                });
+            }
             setIsReserved(true);
             setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied" } : space));
             setSelectedSpace((current) => current ? { ...current, status: "occupied" } : current);
@@ -99,14 +143,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <span className="reservation-availability"><i /> {spaces.filter((space) => space.status === "available").length} spaces available</span>
                         </div>
                         <div className="reservation-legend" aria-label="Parking map legend">
-                            <span><i className="available" /> Available</span><span><i className="selected" /> Selected</span><span><i className="occupied" /> Occupied</span>
+                            <span><i className="available" /> Available</span><span><i className="selected" /> Selected</span><span><i className="reserved" /> My reservation</span><span><i className="occupied" /> Occupied</span>
                         </div>
                         <div className="parking-lane" aria-hidden="true"><span>Entry</span><div /><span>Exit</span></div>
                         <div className="parking-spaces" role="list" aria-label="Available parking spaces">
                             {isLoading && <p className="reservation-map-tip">Loading live parking availability...</p>}
                             {!isLoading && spaces.map((space) => {
                                 const selected = selectedSpace?._id === space._id;
-                                return <button key={space._id} type="button" role="listitem" disabled={space.status === "occupied"} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${selected ? "is-selected" : ""}`} aria-label={`${space.slot}, ${selected ? "selected" : space.status}`}><span>P</span><b>{space.slot}</b></button>;
+                                const isMine = myReservations.some((reservation) => getReservationSlotId(reservation) === String(space._id));
+                                return <button key={space._id} type="button" role="listitem" disabled={space.status === "occupied" && !isMine && !isAdmin} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${isMine ? "reserved-by-me" : ""} ${isAdmin && space.status === "occupied" ? "admin-manageable" : ""} ${selected ? "is-selected" : ""}`} aria-label={`${space.slot}, ${isMine ? "reserved by you" : isAdmin && space.status === "occupied" ? "occupied, manageable by admin" : selected ? "selected" : space.status}`}><span>{isMine ? "★" : "P"}</span><b>{space.slot}</b></button>;
                             })}
                         </div>
                         <p className="reservation-map-tip">Tap an available space to select it.</p>
@@ -125,7 +170,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
                         <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
-                        <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>
+                        {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
                         {error && <p className="reservation-success" role="alert">{error}</p>}
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>

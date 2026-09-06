@@ -1,4 +1,5 @@
 const Parking = require("../models/Parking");
+const Reservation = require("../models/Reservation");
 const mongoose = require("mongoose");
 
 //GET all parkings
@@ -77,10 +78,50 @@ const deleteParking = async (req, res) => {
   }
 };
 
+// Release a reserved slot. Admins may release any occupied slot; users may release their own reservation.
+const releaseParking = async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid parking ID." });
+  }
+
+  try {
+    const reservation = await Reservation.findOne({
+      parkingSlot: id,
+      status: { $in: ["pending", "confirmed", "checked-in"] },
+    }).sort({ createdAt: -1 });
+    const isAdmin = req.user.role === "admin";
+    const ownsReservation = reservation && reservation.user.toString() === req.user._id.toString();
+
+    if (!isAdmin && !ownsReservation) {
+      return res.status(403).json({ message: "You can only release your own reserved slot." });
+    }
+
+    const parking = await Parking.findByIdAndUpdate(
+      id,
+      { $set: { status: "available" } },
+      { new: true, runValidators: true },
+    );
+    if (!parking) {
+      return res.status(404).json({ message: "Parking not found!" });
+    }
+
+    if (reservation) {
+      reservation.status = "cancelled";
+      await reservation.save();
+    }
+
+    res.status(200).json({ parking, reservation });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getParkings,
   getParking,
   addParking,
   updateParking,
   deleteParking,
+  releaseParking,
 };

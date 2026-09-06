@@ -34,7 +34,8 @@ const getReservation = async (req, res) => {
 const addReservation = async (req, res) => {
   let reservedParking;
   try {
-    const { user, parkingSlot, startTime, endTime, vehicleDetails = {}, totalAmount = 0 } = req.body;
+    const { parkingSlot, startTime, endTime, vehicleDetails = {}, totalAmount = 0 } = req.body;
+    const user = req.user._id;
 
     if (!mongoose.Types.ObjectId.isValid(user) || !mongoose.Types.ObjectId.isValid(parkingSlot)) {
       return res.status(400).json({ message: "Valid user and parking slot are required." });
@@ -82,6 +83,9 @@ const addReservation = async (req, res) => {
 const getReservationsByUser = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.userId)) {
     return res.status(400).json({ message: "Invalid user ID." });
+  }
+  if (req.user._id.toString() !== req.params.userId && req.user.role !== "admin") {
+    return res.status(403).json({ message: "You can only view your own reservations." });
   }
   try {
     const reservations = await Reservation.find({ user: req.params.userId })
