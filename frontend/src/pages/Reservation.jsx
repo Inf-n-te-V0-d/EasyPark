@@ -11,13 +11,16 @@ const parkedVehicleLocation = {
 };
 
 const getReservationSlotId = (reservation) => String(reservation.parkingSlot?._id || reservation.parkingSlot || "");
-const todayForInput = () => new Date().toLocaleDateString("en-CA");
+const getToday = () => {
+    const date = new Date();
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 10);
+};
 
 const formatDuration = (minutes) => {
     const hours = Math.floor(minutes / 60);
-    const remainder = minutes % 60;
-    if (!hours) return `${remainder} minutes`;
-    return `${hours} ${hours === 1 ? "hour" : "hours"}${remainder ? ` ${remainder} minutes` : ""}`;
+    const remainingMinutes = minutes % 60;
+    return `${hours} hour${hours === 1 ? "" : "s"}${remainingMinutes ? ` ${remainingMinutes} minutes` : ""}`;
 };
 const emptySlotForm = { slot: "", floor: "1", latitude: "6.9271", longitude: "79.8612", status: "available" };
 
@@ -33,7 +36,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
     const [vehicleNumber, setVehicleNumber] = useState("");
-    const [arrivalDate, setArrivalDate] = useState(todayForInput);
+    const [vehicleNumberError, setVehicleNumberError] = useState("");
+    const [arrivalDate, setArrivalDate] = useState(getToday);
     const [arrivalStart, setArrivalStart] = useState("09:00");
     const [arrivalEnd, setArrivalEnd] = useState("11:00");
     const [slotForm, setSlotForm] = useState(emptySlotForm);
@@ -45,6 +49,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
     const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
     const durationMinutes = Number.isFinite(startDateTime.getTime()) && Number.isFinite(endDateTime.getTime()) && endDateTime > startDateTime
+
+    const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
+    const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
+    const durationMinutes = startDateTime.getTime() && endDateTime.getTime() && endDateTime > startDateTime
         ? Math.round((endDateTime - startDateTime) / 60000)
         : 0;
     const floors = [...new Set(spaces.map((space) => Number(space.floor)).filter(Number.isFinite))].sort((a, b) => a - b);
@@ -199,14 +207,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         }
         if (!selectedSpace) return;
         if (!vehicleNumber.trim()) {
-            setError("Please enter your vehicle number before reserving.");
+            setVehicleNumberError("Please enter your vehicle number before reserving.");
+            return;
+        }
+        setVehicleNumberError("");
+        if (!durationMinutes) {
+            setError("Please choose a valid arrival time range.");
             return;
         }
 
-        if (!durationMinutes) {
-            setError("Choose a valid arrival time range.");
-            return;
-        }
         setIsSaving(true);
         setError("");
         try {
@@ -289,18 +298,17 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
                         <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
-                        <input id="vehicle-number" value={vehicleNumber} onChange={(event) => setVehicleNumber(event.target.value)} placeholder="Enter vehicle number" className="scan-park-input mt-2 mb-4" maxLength={20} />
-                        <dl className="reservation-details">
+                        <input id="vehicle-number" required value={vehicleNumber} onChange={(event) => { setVehicleNumber(event.target.value); setVehicleNumberError(""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
+                        {vehicleNumberError && <p className="user-alert user-alert-error mt-2" role="alert">{vehicleNumberError}</p>}
+                        <dl className="reservation-details reservation-arrival-details">
                             <div>
-                                <dt>Arrival window</dt>
-                                <dd className="reservation-arrival-controls">
-                                    <label><span>Date</span><input type="date" value={arrivalDate} min={todayForInput()} onChange={(event) => setArrivalDate(event.target.value)} /></label>
-                                    <div className="reservation-time-range">
-                                        <label><span>From</span><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></label>
-                                        <span aria-hidden="true">–</span>
-                                        <label><span>To</span><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></label>
-                                    </div>
-                                </dd>
+                                <dt>Arrival date</dt>
+                                <dd><input type="date" value={arrivalDate} min={getToday()} onChange={(event) => setArrivalDate(event.target.value)} /></dd>
+                            </div>
+                            <div className="reservation-time-range">
+                                <label><span>From</span><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></label>
+                                <span aria-hidden="true">-</span>
+                                <label><span>To</span><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></label>
                             </div>
                             <div><dt>Duration</dt><dd>{durationMinutes ? formatDuration(durationMinutes) : "Choose a valid time range"}</dd></div>
                         </dl>
