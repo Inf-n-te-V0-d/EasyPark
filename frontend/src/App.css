@@ -133,7 +133,7 @@
 .user-main {
   width: min(1120px, calc(100% - 40px));
   margin: 0 auto;
-  padding: 9rem 0 5rem;
+  padding: 7.4rem 0 5rem;
 }
 
 .user-hero {
@@ -181,12 +181,18 @@
 .release-button { flex: 0 0 auto; border: 0; background: transparent; color: #dc2626; cursor: pointer; font-size: .75rem; font-weight: 700; }
 .release-button:hover { color: #991b1b; text-decoration: underline; }
 .user-empty { margin: 0; color: var(--color-text); font-size: .85rem; line-height: 1.7; }
+.user-history-button { width: 100%; margin-top: 1rem; border: 1px solid var(--color-border); border-radius: 9px; padding: .7rem; background: transparent; color: var(--color-primary-hover); cursor: pointer; font: inherit; font-size: .76rem; font-weight: 700; }
+.user-history-button:hover { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent); }
+.user-modal-backdrop { position: fixed; z-index: 60; inset: 0; display: grid; place-items: center; padding: 1.25rem; background: rgba(15, 23, 42, .58); }
+.user-history-modal { width: min(100%, 560px); max-height: min(80vh, 640px); overflow-y: auto; border: 1px solid var(--color-border); border-radius: 14px; padding: 1.4rem; background: var(--color-white); box-shadow: 0 24px 70px rgba(0, 0, 0, .25); }
+.user-modal-close { width: 2rem; height: 2rem; border: 1px solid var(--color-border); border-radius: 50%; background: transparent; color: var(--color-text); cursor: pointer; font-size: 1.25rem; line-height: 1; }
+.user-modal-close:hover { border-color: var(--color-primary); color: var(--color-primary-hover); }
 .user-alert { margin: 0 0 1.25rem; padding: .8rem 1rem; border-radius: 8px; font-size: .8rem; }
 .user-alert-error { border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c; }
 .user-alert-success { border: 1px solid #bbf7d0; background: #f0fdf4; color: #15803d; }
 
 @media (max-width: 760px) {
-  .user-main { width: min(100% - 28px, 600px); padding-top: 7.5rem; }
+  .user-main { width: min(100% - 28px, 600px); padding-top: 6.2rem; }
   .user-grid { grid-template-columns: 1fr; }
   .user-admin-panels { grid-template-columns: 1fr; }
   .user-card { padding: 1.2rem; }

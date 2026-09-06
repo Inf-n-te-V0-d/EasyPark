@@ -9,7 +9,7 @@ const Privacy = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     return (
         <div className="min-h-screen bg-[var(--color-background)] text-[var(--color-text)]">
-            <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
+            <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} showBack />
 
             <main className="mx-auto max-w-4xl px-6 pb-16 pt-28 lg:px-10">
                 <section className="rounded-3xl border border-[var(--color-border)] bg-[var(--color-white)] p-8 shadow-sm lg:p-10">

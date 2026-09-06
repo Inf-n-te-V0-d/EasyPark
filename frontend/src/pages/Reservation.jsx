@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
 
 const parkedVehicleLocation = {
@@ -130,6 +131,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         <div className="reservation-page min-h-screen">
                         <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                         <main className="reservation-main">
+                    <BackButton onNavigate={onNavigate} />
+                    {error && <p className="user-alert user-alert-error" role="alert">{error}</p>}
                 <header className="reservation-hero">
                     <span className="reservation-eyebrow">Reserve your space</span>
                     <h1>Your parking spot, <span>saved ahead.</span></h1>
@@ -171,7 +174,6 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         </div>
                         <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
                         {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
-                        {error && <p className="reservation-success" role="alert">{error}</p>}
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
                     </aside>

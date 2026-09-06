@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import BackButton from "../components/BackButton";
 import { apiRequest, clearSession, getSession } from "../lib/api";
 
 const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
+    const activeReservationStatuses = ["pending", "confirmed", "checked-in"];
     const session = getSession();
     const userId = session?._id;
     const token = session?.token;
@@ -14,7 +16,10 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [loading, setLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     const isAdmin = profile?.role === "admin";
+    const activeReservations = reservations.filter((reservation) => activeReservationStatuses.includes(reservation.status));
+    const reservationHistory = reservations.filter((reservation) => !activeReservationStatuses.includes(reservation.status));
 
     useEffect(() => {
         if (!userId || !token) {
@@ -75,6 +80,7 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         <div className="user-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <main className="user-main">
+                <BackButton onNavigate={onNavigate} />
                 <header className="user-hero">
                     <span className="reservation-eyebrow">EasyPark account</span>
                     <h1>Welcome back, <span>{profile?.name || "driver"}.</span></h1>
@@ -92,12 +98,20 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     </section>
 
                     <section className="user-card" aria-labelledby="reservations-title">
-                        <div className="user-card-heading"><div><p className="reservation-label">Bookings</p><h2 id="reservations-title">Your reservations</h2></div><span className="user-count">{reservations.filter((item) => item.status !== "cancelled").length}</span></div>
+                        <div className="user-card-heading"><div><p className="reservation-label">Bookings</p><h2 id="reservations-title">Your reservations</h2></div><span className="user-count">{activeReservations.length}</span></div>
                         {loading && <p className="user-empty">Loading your parking activity...</p>}
-                        {!loading && !reservations.length && <p className="user-empty">No reservations yet. Choose a space to get started.</p>}
-                        <div className="user-list">{reservations.map((reservation) => <div className="user-list-item" key={reservation._id}><div><strong>{reservation.parkingSlot?.slot || "Parking slot"}</strong><span>{reservation.status} · {new Date(reservation.startTime).toLocaleString()}</span></div>{reservation.status !== "cancelled" && <button type="button" className="release-button" onClick={() => releaseSlot(reservation.parkingSlot?._id)}>Release slot</button>}</div>)}</div>
+                        {!loading && !activeReservations.length && <p className="user-empty">No active reservations. Choose a space to get started.</p>}
+                        <div className="user-list">{activeReservations.map((reservation) => <div className="user-list-item" key={reservation._id}><div><strong>{reservation.parkingSlot?.slot || "Parking slot"}</strong><span>{reservation.status} · {new Date(reservation.startTime).toLocaleString()}</span></div><button type="button" className="release-button" onClick={() => releaseSlot(reservation.parkingSlot?._id)}>Release slot</button></div>)}</div>
+                        {!!reservationHistory.length && <button type="button" className="user-history-button" onClick={() => setIsHistoryOpen(true)}>View history ({reservationHistory.length})</button>}
                     </section>
                 </div>
+
+                {isHistoryOpen && <div className="user-modal-backdrop" role="presentation" onClick={() => setIsHistoryOpen(false)}>
+                    <section className="user-history-modal" role="dialog" aria-modal="true" aria-labelledby="history-title" onClick={(event) => event.stopPropagation()}>
+                        <div className="user-card-heading"><div><p className="reservation-label">Past activity</p><h2 id="history-title">Reservation history</h2></div><button type="button" className="user-modal-close" onClick={() => setIsHistoryOpen(false)} aria-label="Close reservation history">×</button></div>
+                        <div className="user-list">{reservationHistory.map((reservation) => <div className="user-list-item" key={reservation._id}><div><strong>{reservation.parkingSlot?.slot || "Parking slot"}</strong><span>{reservation.status} · {new Date(reservation.startTime).toLocaleString()}</span></div></div>)}</div>
+                    </section>
+                </div>}
 
                 {isAdmin && <div className="user-admin-panels">
                     <section className="user-card user-admin-card" aria-labelledby="admin-title"><div className="user-card-heading"><div><p className="reservation-label">Administration</p><h2 id="admin-title">Parking control</h2></div><span className="user-role">all slots</span></div><div className="user-list">{parking.filter((space) => space.status === "occupied").map((space) => <div className="user-list-item" key={space._id}><div><strong>{space.slot}</strong><span>Level {space.floor} · occupied</span></div><button type="button" className="release-button" onClick={() => releaseSlot(space._id)}>Release slot</button></div>)}</div>{!parking.some((space) => space.status === "occupied") && <p className="user-empty">All parking slots are available.</p>}</section>
