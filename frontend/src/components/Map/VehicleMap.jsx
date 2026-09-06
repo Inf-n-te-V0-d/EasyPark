@@ -53,8 +53,6 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [status, setStatus] = useState("Ready to locate you");
     const [isLocating, setIsLocating] = useState(false);
     const [routeError, setRouteError] = useState("");
-    const liveNavigationUrl = vehicle ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${vehicle.lat},${vehicle.lng}`)}&travelmode=walking` : "#";
-
     const googleMapsEmbedUrl = useMemo(() => {
         if (!vehicle) return "about:blank";
         const origin = `${userLocation.lat},${userLocation.lng}`;
