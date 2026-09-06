@@ -88,8 +88,9 @@ Border Radius: 12px
 Branch(Milan) : milan-feature      
 Branch(Nethum) : nethum-feature-server        
 Branch(Adisha) : adisha-feature    
-Branch(omika) : omika-feature  
-Branch(nethum) : nethum-feature-backend-routes  
-Branch(nethum) : nethum-feature-Reservation-routes  
-Branch(dilshan) : dilsha-feature   
+Branch(Omika) : omika-feature  
+Branch(Nethum) : nethum-feature-backend-routes  
+Branch(Nethum) : nethum-feature-Reservation-routes  
+Branch(Dilshan) : dilsha-feature   
 Branch(Milan)  : milan-map-integration
+Branch(Nethum) : nethum-feature-parking-routes
