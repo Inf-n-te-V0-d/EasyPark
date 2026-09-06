@@ -10,6 +10,12 @@ const parkingFields = ({ slot, floor, latitude, longitude, status }) => ({
   ...(status ? { status } : {}),
 });
 
+const requireAdminAccess = (req, res) => {
+  if (req.user?.role === "admin") return true;
+  res.status(403).json({ message: "Administrator access is required to manage parking slots." });
+  return false;
+};
+
 //GET all parkings
 const getParkings = async (req, res) => {
   try {
@@ -39,6 +45,7 @@ const getParking = async (req, res) => {
 
 // ADD a parking
 const addParking = async (req, res) => {
+  if (!requireAdminAccess(req, res)) return;
   try {
     const details = parkingFields(req.body);
     if (!details.slot || !Number.isFinite(details.floor) || !Number.isFinite(Number(details.latitude)) || !Number.isFinite(Number(details.longitude))) {
@@ -58,6 +65,7 @@ const addParking = async (req, res) => {
 
 // UPDATE a parking
 const updateParking = async (req, res) => {
+  if (!requireAdminAccess(req, res)) return;
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ message: "Invalid parking ID." });
@@ -87,6 +95,7 @@ const updateParking = async (req, res) => {
 
 // DELETE a parking
 const deleteParking = async (req, res) => {
+  if (!requireAdminAccess(req, res)) return;
   const { id } = req.params;
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({ message: "No sucj ID found!" });
