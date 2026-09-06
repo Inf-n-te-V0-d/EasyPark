@@ -11,6 +11,14 @@ const parkedVehicleLocation = {
 };
 
 const getReservationSlotId = (reservation) => String(reservation.parkingSlot?._id || reservation.parkingSlot || "");
+const todayForInput = () => new Date().toLocaleDateString("en-CA");
+
+const formatDuration = (minutes) => {
+    const hours = Math.floor(minutes / 60);
+    const remainder = minutes % 60;
+    if (!hours) return `${remainder} minutes`;
+    return `${hours} ${hours === 1 ? "hour" : "hours"}${remainder ? ` ${remainder} minutes` : ""}`;
+};
 
 const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const currentUser = getSession();
@@ -23,6 +31,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
+    const [arrivalDate, setArrivalDate] = useState(todayForInput);
+    const [arrivalStart, setArrivalStart] = useState("09:00");
+    const [arrivalEnd, setArrivalEnd] = useState("11:00");
+    const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
+    const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
+    if (endDateTime <= startDateTime) endDateTime.setDate(endDateTime.getDate() + 1);
+    const durationMinutes = Number.isFinite(startDateTime.getTime()) && Number.isFinite(endDateTime.getTime())
+        ? Math.round((endDateTime - startDateTime) / 60000)
+        : 0;
 
     useEffect(() => {
         window.scrollTo({
@@ -93,8 +110,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         }
         if (!selectedSpace) return;
 
-        const startTime = new Date();
-        const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+        if (!durationMinutes) {
+            setError("Choose a valid arrival time range.");
+            return;
+        }
         setIsSaving(true);
         setError("");
         try {
@@ -103,8 +122,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 body: JSON.stringify({
                     user: user._id,
                     parkingSlot: selectedSpace._id,
-                    startTime: startTime.toISOString(),
-                    endTime: endTime.toISOString(),
+                    startTime: startDateTime.toISOString(),
+                    endTime: endDateTime.toISOString(),
                     totalAmount: 0,
                 }),
             });
@@ -172,7 +191,20 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <strong>{parkedVehicleLocation.name}</strong>
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
-                        <dl className="reservation-details"><div><dt>Arrival window</dt><dd>Today, 9:00 AM – 11:00 AM</dd></div><div><dt>Duration</dt><dd>Up to 2 hours</dd></div></dl>
+                        <dl className="reservation-details">
+                            <div>
+                                <dt>Arrival window</dt>
+                                <dd className="reservation-arrival-controls">
+                                    <label><span>Date</span><input type="date" value={arrivalDate} min={todayForInput()} onChange={(event) => setArrivalDate(event.target.value)} /></label>
+                                    <div className="reservation-time-range">
+                                        <label><span>From</span><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></label>
+                                        <span aria-hidden="true">–</span>
+                                        <label><span>To</span><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></label>
+                                    </div>
+                                </dd>
+                            </div>
+                            <div><dt>Duration</dt><dd>{durationMinutes ? formatDuration(durationMinutes) : "Choose a valid time range"}</dd></div>
+                        </dl>
                         {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
                         {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
                         <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
