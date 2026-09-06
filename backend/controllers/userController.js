@@ -214,10 +214,28 @@ const updateUser = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(404).json({ message: "No Such ID found." });
   }
+  const isAdmin = req.user?.role === "admin";
+  if (!isAdmin && req.user?._id.toString() !== id) {
+    return res.status(403).json({ message: "You can only update your own profile." });
+  }
+
+  const permittedFields = isAdmin
+    ? ["name", "email", "telephone", "vehicleDetails", "role"]
+    : ["name", "email", "telephone", "vehicleDetails"];
+  const updates = Object.fromEntries(
+    permittedFields
+      .filter((field) => Object.prototype.hasOwnProperty.call(req.body, field))
+      .map((field) => [field, req.body[field]]),
+  );
+  if (updates.email) updates.email = String(updates.email).trim().toLowerCase();
+  if (updates.telephone) updates.telephone = String(updates.telephone).trim();
+  if (!Object.keys(updates).length) {
+    return res.status(400).json({ message: "No permitted profile fields were provided." });
+  }
   try {
     const user = await User.findByIdAndUpdate(
       id,
-      { ...req.body },
+      updates,
       { new: true, runValidators: true },
     );
     if (!user) {
