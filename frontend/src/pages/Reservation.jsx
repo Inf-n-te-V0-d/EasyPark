@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
+import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
 
 const parkedVehicleLocation = {
@@ -130,6 +131,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         <div className="reservation-page min-h-screen">
                         <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
                         <main className="reservation-main">
+                    <BackButton onNavigate={onNavigate} />
                 <header className="reservation-hero">
                     <span className="reservation-eyebrow">Reserve your space</span>
                     <h1>Your parking spot, <span>saved ahead.</span></h1>
