@@ -1,10 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
-import { apiRequest, getSession } from "../../lib/api";
+import BackButton from "../BackButton";
+import { apiRequest, saveVehicleLocation, getSession } from "../../lib/api";
 import "./VehicleMap.css";
 
 const DEFAULT_USER = { lat: 6.92662, lng: 79.86008 };
+
+const getReservedVehicles = (reservations) => reservations
+    .filter((reservation) => ["pending", "confirmed", "checked-in"].includes(reservation.status))
+    .map((reservation) => {
+        const slot = reservation.parkingSlot;
+        const lat = Number(slot?.latitude);
+        const lng = Number(slot?.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+        return {
+            id: reservation._id,
+            lat,
+            lng,
+            slot: slot.slot,
+            floor: `Level ${slot.floor}`,
+            label: `Reserved vehicle · ${slot.slot}`,
+        };
+    })
+    .filter(Boolean);
 
 const formatDistance = (meters) => meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${Math.round(meters)} m`;
 const formatDuration = (seconds) => {
@@ -25,54 +44,16 @@ const estimateWalkingRoute = (start, end) => {
 };
 
 const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
-    const session = getSession();
-    const currentUserId = session?._id;
+    const userId = getSession()?._id;
     const [vehicles, setVehicles] = useState([]);
     const [vehicle, setVehicle] = useState(null);
+    const [isLoadingVehicles, setIsLoadingVehicles] = useState(Boolean(userId));
     const [userLocation, setUserLocation] = useState(DEFAULT_USER);
     const [routeInfo, setRouteInfo] = useState({ distance: 0, duration: 0 });
     const [status, setStatus] = useState("Ready to locate you");
     const [isLocating, setIsLocating] = useState(false);
     const [routeError, setRouteError] = useState("");
-    const [isLoadingVehicles, setIsLoadingVehicles] = useState(true);
-
-    useEffect(() => {
-        if (!currentUserId) {
-            setIsLoadingVehicles(false);
-            return;
-        }
-
-        let active = true;
-        apiRequest(`/reservation/user/${currentUserId}`)
-            .then((reservations) => {
-                if (!active) return;
-                const reservedVehicles = reservations
-                    .filter((reservation) => ["pending", "confirmed", "checked-in"].includes(reservation.status))
-                    .map((reservation) => {
-                        const slot = reservation.parkingSlot;
-                        const lat = Number(slot?.latitude);
-                        const lng = Number(slot?.longitude);
-                        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-                        return {
-                            id: reservation._id,
-                            reservationId: reservation._id,
-                            lat,
-                            lng,
-                            slot: slot.slot,
-                            floor: `Level ${slot.floor}`,
-                            label: `Reserved vehicle · ${slot.slot}`,
-                        };
-                    })
-                    .filter(Boolean);
-                setVehicles(reservedVehicles);
-                setVehicle(reservedVehicles[0] || null);
-                if (!reservedVehicles.length) setStatus("No reserved vehicles found");
-            })
-            .catch(() => setStatus("Unable to load your reserved vehicles"))
-            .finally(() => active && setIsLoadingVehicles(false));
-
-        return () => { active = false; };
-    }, [currentUserId]);
+    const liveNavigationUrl = vehicle ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${vehicle.lat},${vehicle.lng}`)}&travelmode=walking` : "#";
 
     const googleMapsEmbedUrl = useMemo(() => {
         if (!vehicle) return "about:blank";
@@ -107,6 +88,20 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         }
     }, []);
 
+    useEffect(() => {
+        if (!userId) return;
+
+        apiRequest(`/reservation/user/${userId}`)
+            .then((reservations) => {
+                const reservedVehicles = getReservedVehicles(reservations);
+                setVehicles(reservedVehicles);
+                setVehicle(reservedVehicles[0] || null);
+                if (reservedVehicles[0]) getRoute(DEFAULT_USER, reservedVehicles[0]);
+            })
+            .catch(() => setVehicles([]))
+            .finally(() => setIsLoadingVehicles(false));
+    }, [getRoute, userId]);
+
     const locateUser = useCallback(() => {
         if (!vehicle) return;
         if (!navigator.geolocation) {
@@ -134,7 +129,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     const saveCurrentPosition = () => {
         if (!vehicle) return;
-        const nextVehicle = { ...vehicle, ...userLocation, label: vehicle.label };
+        const nextVehicle = saveVehicleLocation({ ...vehicle, ...userLocation, label: "Saved vehicle location" });
         setVehicles((current) => current.map((item) => item.id === vehicle.id ? nextVehicle : item));
         setVehicle(nextVehicle);
         setStatus("Vehicle location saved on this device");
@@ -159,6 +154,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         <div className="tracking-page min-h-screen">
             <Navbar onNavigate={onNavigate} isDarkMode={isDarkMode} onToggleTheme={onToggleTheme} />
             <main className="tracking-main">
+                <BackButton onNavigate={onNavigate} />
                 <section className="tracking-heading">
                     <span className="tracking-eyebrow"><i /> Vehicle tracker</span>
                     <h1>Find your way <span>back to your car.</span></h1>
@@ -167,11 +163,15 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
                 <section className="tracking-layout" aria-label="Vehicle location and directions">
                     <div className="tracking-map-card">
-                        {vehicle ? <><iframe className="tracking-map" title="Google Maps directions to your vehicle" src={googleMapsEmbedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" /><div className="tracking-map-key"><span><i className="tracking-key-user" /> Your live location</span><span><i className="tracking-key-vehicle" /> Destination: {vehicle.floor} · {vehicle.slot}</span></div></> : <div className="tracking-empty-state">{isLoadingVehicles ? "Loading your reserved vehicles..." : "No reserved vehicles available. Reserve a parking slot first."}</div>}
+                        <iframe className="tracking-map" title="Google Maps directions to your vehicle" src={googleMapsEmbedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+                        {vehicle && <div className="tracking-map-key"><span><i className="tracking-key-user" /> Your live location</span><span><i className="tracking-key-vehicle" /> Destination: {vehicle.floor} · {vehicle.slot}</span></div>}
                     </div>
 
                     <aside className="tracking-panel">
                         {vehicles.length > 1 && <div className="tracking-vehicle-list" aria-label="Reserved vehicles"><span>Your reserved vehicles</span>{vehicles.map((savedVehicle, index) => <button type="button" key={savedVehicle.id} className={savedVehicle.id === vehicle?.id ? "is-active" : ""} onClick={() => selectVehicle(savedVehicle)}>{savedVehicle.label || `Vehicle ${index + 1}`} · {savedVehicle.slot}</button>)}</div>}
+                        {isLoadingVehicles && <p className="tracking-help">Loading your reserved vehicles…</p>}
+                        {!isLoadingVehicles && !vehicle && <p className="tracking-help">No active reserved vehicles found. Reserve a parking slot to see it here.</p>}
+                        {vehicle && <>
                         <div className="tracking-status"><span className="tracking-status-dot" /> {status}</div>
                         {vehicle && <><div className="tracking-destination"><span>Parked at</span><strong>{vehicle.label}</strong><div className="tracking-parking-details"><div><small>Slot</small><b>{vehicle.slot}</b></div><div><small>Floor</small><b>{vehicle.floor}</b></div></div><small>{vehicle.lat.toFixed(5)}, {vehicle.lng.toFixed(5)}</small></div>
                         <div className="tracking-stats">
@@ -183,6 +183,7 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         <button type="button" className="tracking-button tracking-button-secondary" onClick={saveCurrentPosition}>Save this as my vehicle location</button></>}
                         {routeError && <p className="tracking-help" role="status">{routeError}</p>}
                         <p className="tracking-help">Tip: after scanning at your bay, save the vehicle location once. It will be here when you return.</p>
+                        </>}
                     </aside>
                 </section>
             </main>
