@@ -16,6 +16,7 @@ EasyPark is a React and Express parking application backed by MongoDB.
 ### 6. npm install cors
 ### 7. npm install bcrypt
 ### 8. npm install axios dotenv cors
+### 9. npm install jsonwebtoken 
 
 
 ## Then create .env file inside backend folder
@@ -93,4 +94,5 @@ Branch(Nethum) : nethum-feature-backend-routes
 Branch(Nethum) : nethum-feature-Reservation-routes  
 Branch(Dilshan) : dilsha-feature   
 Branch(Milan)  : milan-map-integration  
-Branch(Nethum) : nethum-feature-parking-routes
+Branch(Nethum) : nethum-feature-parking-routes  
+Branch(Nethum) : nethum-feature-jwt-authentication 
