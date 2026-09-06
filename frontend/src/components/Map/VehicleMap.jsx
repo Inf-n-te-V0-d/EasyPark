@@ -53,6 +53,12 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [status, setStatus] = useState("Ready to locate you");
     const [isLocating, setIsLocating] = useState(false);
     const [routeError, setRouteError] = useState("");
+    const [guideStep, setGuideStep] = useState(0);
+    const parkingGuide = [
+        { title: "Reserve a space", text: "Choose an available bay before you arrive." },
+        { title: "Park and scan", text: "Scan your parking QR code when you reach your bay." },
+        { title: "Find your vehicle", text: "Return here anytime for directions to your saved bay." },
+    ];
     const googleMapsEmbedUrl = useMemo(() => {
         if (!vehicle) return "about:blank";
         const origin = `${userLocation.lat},${userLocation.lng}`;
@@ -161,14 +167,25 @@ const VehicleMap = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
                 <section className="tracking-layout" aria-label="Vehicle location and directions">
                     <div className="tracking-map-card">
-                        <iframe className="tracking-map" title="Google Maps directions to your vehicle" src={googleMapsEmbedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
+                        {vehicle ? <iframe className="tracking-map" title="Google Maps directions to your vehicle" src={googleMapsEmbedUrl} loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" /> : <div className="tracking-empty-state">
+                            <div className="tracking-empty-content">
+                                <span className="tracking-empty-icon"><img src="/Logo_icon.png" alt="EasyPark" /></span>
+                                <p className="tracking-empty-label">Vehicle tracker</p>
+                                <h2>Your vehicle location will appear here.</h2>
+                                <p>Reserve a space, then scan at your bay to save its location and get walking directions back to your vehicle.</p>
+                                <div className="tracking-guide" aria-label="How vehicle tracking works">
+                                    {parkingGuide.map((step, index) => <button type="button" key={step.title} className={guideStep === index ? "is-active" : ""} onClick={() => setGuideStep(index)} aria-pressed={guideStep === index}><span>{index + 1}</span>{step.title}</button>)}
+                                </div>
+                                <p className="tracking-guide-detail" aria-live="polite"><b>{parkingGuide[guideStep].title}</b> — {parkingGuide[guideStep].text}</p>
+                            </div>
+                        </div>}
                         {vehicle && <div className="tracking-map-key"><span><i className="tracking-key-user" /> Your live location</span><span><i className="tracking-key-vehicle" /> Destination: {vehicle.floor} · {vehicle.slot}</span></div>}
                     </div>
 
                     <aside className="tracking-panel">
                         {vehicles.length > 1 && <div className="tracking-vehicle-list" aria-label="Reserved vehicles"><span>Your reserved vehicles</span>{vehicles.map((savedVehicle, index) => <button type="button" key={savedVehicle.id} className={savedVehicle.id === vehicle?.id ? "is-active" : ""} onClick={() => selectVehicle(savedVehicle)}>{savedVehicle.label || `Vehicle ${index + 1}`} · {savedVehicle.slot}</button>)}</div>}
                         {isLoadingVehicles && <p className="tracking-help">Loading your reserved vehicles…</p>}
-                        {!isLoadingVehicles && !vehicle && <p className="tracking-help">No active reserved vehicles found. Reserve a parking slot to see it here.</p>}
+                        {!isLoadingVehicles && !vehicle && <div className="tracking-empty-panel"><span className="tracking-status-dot" /><h2>No vehicle to track yet</h2><p>Make a reservation to save your parking bay and unlock directions back to it.</p><button type="button" className="tracking-button" onClick={() => onNavigate?.("reservation")}>Reserve a parking space</button></div>}
                         {vehicle && <>
                         <div className="tracking-status"><span className="tracking-status-dot" /> {status}</div>
                         {vehicle && <><div className="tracking-destination"><span>Parked at</span><strong>{vehicle.label}</strong><div className="tracking-parking-details"><div><small>Slot</small><b>{vehicle.slot}</b></div><div><small>Floor</small><b>{vehicle.floor}</b></div></div><small>{vehicle.lat.toFixed(5)}, {vehicle.lng.toFixed(5)}</small></div>
