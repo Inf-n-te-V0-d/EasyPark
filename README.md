@@ -26,7 +26,7 @@ EasyPark is a React and Express parking application backed by MongoDB.
 ## Run locally
 
 1. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URI` for MongoDB Atlas or `MONGO_LOCAL` for local MongoDB.
-2. Install backend dependencies and start the API:
+2. Install backend dependencies and start the API (before run mongodb compuss and connect to database):
 
    ```text
    cd backend
