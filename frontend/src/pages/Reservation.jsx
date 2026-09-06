@@ -128,8 +128,6 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                     user: user._id,
                     parkingSlot: selectedSpace._id,
                     vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
-                    startTime: startTime.toISOString(),
-                    endTime: endTime.toISOString(),
                     startTime: startDateTime.toISOString(),
                     endTime: endDateTime.toISOString(),
                     totalAmount: 0,
