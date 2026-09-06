@@ -1,13 +1,16 @@
 import { useState } from 'react'
+import { apiRequest, saveSession } from '../lib/api'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const Icon = ({ children, className = '' }) => <svg className={`fill-none stroke-current stroke-[1.9] ${className}`} viewBox="0 0 24 24" aria-hidden="true">{children}</svg>
 const CheckIcon = () => <Icon className="h-4 w-4"><path d="m5 12 4.2 4.2L19 6.8" /></Icon>
 
 export default function Register({ onNavigate }) {
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  const [form, setForm] = useState({ name: '', email: '', telephone: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [serverError, setServerError] = useState('')
 
   const updateField = ({ target }) => {
     const { name, value } = target
@@ -15,23 +18,41 @@ export default function Register({ onNavigate }) {
     setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault()
     const next = {}
 
     if (!form.name.trim()) next.name = 'Name is required.'
     if (!form.email.trim()) next.email = 'Email address is required.'
     else if (!emailPattern.test(form.email)) next.email = 'Enter a valid email address.'
+    if (!form.telephone.trim()) next.telephone = 'Telephone number is required.'
     if (!form.password) next.password = 'Password is required.'
     else if (form.password.length < 6) next.password = 'Password must be at least 6 characters.'
     if (!form.confirmPassword) next.confirmPassword = 'Confirm your password.'
     else if (form.password !== form.confirmPassword) next.confirmPassword = 'Passwords do not match.'
 
     setErrors(next)
+    setServerError('')
 
     if (!Object.keys(next).length) {
-      console.info('EasyPark registration validated', { name: form.name, email: form.email })
-      onNavigate?.('login')
+      setIsSubmitting(true)
+      try {
+        const user = await apiRequest('/signup', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            telephone: form.telephone,
+            password: form.password,
+          }),
+        })
+        saveSession(user)
+        onNavigate?.('home')
+      } catch (error) {
+        setServerError(error.message)
+      } finally {
+        setIsSubmitting(false)
+      }
     }
   }
 
@@ -64,6 +85,11 @@ export default function Register({ onNavigate }) {
               {errors.email && <small className="text-[10px] font-medium text-red-600">{errors.email}</small>}
             </label>
             <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
+              <span>Telephone number</span>
+              <input className={input} name="telephone" type="tel" autoComplete="tel" placeholder="Your phone number" value={form.telephone} onChange={updateField} aria-invalid={Boolean(errors.telephone)} />
+              {errors.telephone && <small className="text-[10px] font-medium text-red-600">{errors.telephone}</small>}
+            </label>
+            <label className="grid gap-2 text-[12px] font-semibold text-slate-900">
               <span>Password</span>
               <span className="relative">
                 <input className={`${input} pr-12`} name="password" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Create a password" value={form.password} onChange={updateField} aria-invalid={Boolean(errors.password)} />
@@ -78,8 +104,9 @@ export default function Register({ onNavigate }) {
               <input className={input} name="confirmPassword" type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder="Confirm password" value={form.confirmPassword} onChange={updateField} aria-invalid={Boolean(errors.confirmPassword)} />
               {errors.confirmPassword && <small className="text-[10px] font-medium text-red-600">{errors.confirmPassword}</small>}
             </label>
-            <button className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600" type="submit">
-              Create account
+            {serverError && <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[11px] leading-5 text-red-700" role="alert">{serverError}</div>}
+            <button className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating account…' : 'Create account'}
               <Icon className="h-[18px] w-[18px]"><path d="M5 12h13M13 6l6 6-6 6" /></Icon>
             </button>
           </form>

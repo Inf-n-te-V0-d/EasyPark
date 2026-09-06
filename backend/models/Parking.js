@@ -17,7 +17,7 @@ const parkingSchema = new mongoose.Schema(
         required: true,
         trim: true,
     },
-    longtitude : {
+    longitude : {
         type : String,
         required: true,
         trim: true,
