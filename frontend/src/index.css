@@ -2,6 +2,44 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
+@keyframes contact-modal-open {
+  from { opacity: 0; transform: translateY(8px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.contact-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, .56);
+  backdrop-filter: blur(5px);
+}
+
+.contact-modal {
+  position: relative;
+  width: min(100%, 24rem);
+  padding: 2rem;
+  border: 1px solid rgba(226, 232, 240, .9);
+  border-radius: 1.25rem;
+  background: #fff;
+  color: #0f172a;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, .3);
+  animation: contact-modal-open .26s cubic-bezier(.22, 1, .36, 1);
+}
+
+.contact-modal-heading span { color: #16a34a; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.contact-modal h2 { margin: .35rem 2.5rem 1.35rem 0; font-size: 1.55rem; font-weight: 700; letter-spacing: -.02em; }
+.contact-modal-details { display: grid; gap: .75rem; }
+.contact-modal a { display: grid; gap: .2rem; padding: .9rem 1rem; border: 1px solid #e2e8f0; border-radius: .8rem; color: #15803d; font-size: .95rem; font-weight: 600; text-decoration: none; transition: border-color .18s ease, background-color .18s ease, transform .18s ease; }
+.contact-modal a span { color: #64748b; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.contact-modal a:hover { border-color: #86efac; background: #f0fdf4; transform: translateY(-1px); }
+.contact-modal-close { position: absolute; top: 1rem; right: 1rem; display: grid; width: 2rem; height: 2rem; place-items: center; border: 0; border-radius: 50%; background: #f1f5f9; color: #64748b; font-size: 1.35rem; line-height: 1; cursor: pointer; transition: background-color .18s ease, color .18s ease; }
+.contact-modal-close:hover { background: #e2e8f0; color: #0f172a; }
+.contact-modal-close:focus-visible { outline: 3px solid #bbf7d0; outline-offset: 2px; }
+
 :root {
   --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
   /* Light-mode design tokens */
