@@ -12,6 +12,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import CarLoader from "./components/CarLoader";
 import VehicleMap from "./components/Map/VehicleMap";
+import User from "./pages/User";
 
 function App() {
     const [isLoading, setIsLoading] = useState(true);
@@ -99,6 +100,10 @@ function App() {
 
     if (page === "tracking") {
         return <VehicleMap onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
+    }
+
+    if (page === "user") {
+        return <User onNavigate={setPage} isDarkMode={isDarkMode} onToggleTheme={() => setIsDarkMode((value) => !value)} />;
     }
 
     if (page === "login") {

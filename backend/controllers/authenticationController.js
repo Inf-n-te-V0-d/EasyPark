@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const { createToken } = require("../middleware/authMiddleware");
 const signup = async (req, res) => {
   try {
     const { name, email, password, telephone, vehicleDetails } = req.body;
@@ -83,7 +84,8 @@ const signin = async (req, res) => {
         delete userResponse.password;
         res.status(200).json({
             message: "Signin Successful.",
-            user: userResponse
+          user: userResponse,
+          token: createToken(user._id.toString()),
         });
     }catch(error){
         res.status(500).json({message: error.message});
