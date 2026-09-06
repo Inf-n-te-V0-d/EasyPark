@@ -16,7 +16,10 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const [qrDataUrl, setQrDataUrl] = useState("");
     const [scanResult, setScanResult] = useState("No QR scanned yet");
     const [sessionError, setSessionError] = useState("");
+    const [reservationMessage, setReservationMessage] = useState("");
+    const [reservationError, setReservationError] = useState("");
     const scannerRef = useRef(null);
+    const scanProcessingRef = useRef(false);
     const readerId = "reader";
 
     useEffect(() => {
@@ -67,6 +70,85 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         a.click();
     };
 
+    const reserveScannedSlot = async (decodedText) => {
+        if (scanProcessingRef.current) return;
+        scanProcessingRef.current = true;
+        setScanResult(decodedText);
+        setReservationMessage("");
+        setReservationError("");
+
+        try {
+            if (!userId || !token) {
+                throw new Error("Please sign in before reserving a parking space.");
+            }
+
+            let scannedData = decodedText.trim();
+            try {
+                const parsedData = JSON.parse(scannedData);
+                scannedData = parsedData.slot || "";
+            } catch {
+                // A plain QR value such as A-01 is also a valid slot name.
+            }
+
+            const slotName = String(scannedData).trim();
+            if (!slotName) {
+                throw new Error("This QR code does not contain a parking slot name.");
+            }
+
+            const parkingSpaces = await apiRequest("/parking");
+            const parkingSpace = parkingSpaces.find(
+                (space) => String(space.slot).trim().toUpperCase() === slotName.toUpperCase(),
+            );
+
+            if (!parkingSpace) {
+                throw new Error(`Parking slot ${slotName} was not found.`);
+            }
+
+            const reservations = await apiRequest(`/reservation/user/${userId}`);
+            const isReservedByUser = reservations.some((reservation) => {
+                const reservationSlotId = reservation.parkingSlot?._id || reservation.parkingSlot;
+                return String(reservationSlotId) === String(parkingSpace._id)
+                    && ["pending", "confirmed", "checked-in"].includes(reservation.status);
+            });
+
+            if (isReservedByUser) {
+                setReservationMessage(`Parking slot ${parkingSpace.slot} is yours.`);
+                return;
+            }
+
+            if (parkingSpace.status !== "available") {
+                throw new Error(`Parking slot ${parkingSpace.slot} is not available.`);
+            }
+
+            const startTime = new Date();
+            const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+            await apiRequest("/reservation", {
+                method: "POST",
+                body: JSON.stringify({
+                    parkingSlot: parkingSpace._id,
+                    startTime: startTime.toISOString(),
+                    endTime: endTime.toISOString(),
+                    totalAmount: 0,
+                }),
+            });
+
+            if (Number.isFinite(Number(parkingSpace.latitude)) && Number.isFinite(Number(parkingSpace.longitude))) {
+                saveVehicleLocation({
+                    lat: Number(parkingSpace.latitude),
+                    lng: Number(parkingSpace.longitude),
+                    label: `Reserved vehicle · ${parkingSpace.slot}`,
+                    slot: parkingSpace.slot,
+                    floor: `Level ${parkingSpace.floor}`,
+                });
+            }
+            setReservationMessage(`Success! Parking slot ${parkingSpace.slot} is reserved for you.`);
+        } catch (error) {
+            setReservationError(error.message);
+        } finally {
+            scanProcessingRef.current = false;
+        }
+    };
+
     const startScanner = async () => {
         if (scannerRef.current) {
             scannerRef.current.clear().catch(() => null);
@@ -96,7 +178,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         const scanner = new Html5QrcodeScanner(readerId, config, false);
         scanner.render(
             (decodedText) => {
-                setScanResult(decodedText);
+                reserveScannedSlot(decodedText);
             },
             () => {
                 // ignore scan errors
@@ -217,6 +299,8 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                                 <p className="scan-result-value">{QR_read_result}</p>
                             </div>
                         </div>
+                        {reservationMessage && <p className="reservation-success mt-3" role="status">{reservationMessage}</p>}
+                        {reservationError && <p className="user-alert user-alert-error mt-3" role="alert">{reservationError}</p>}
                         {scanResult !== "No QR scanned yet" && (
                             <button type="button" className="scan-park-button scan-park-button-secondary mt-3 w-full" onClick={saveScannedVehicleLocation}>
                                 Save scan & view vehicle map
