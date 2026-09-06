@@ -200,9 +200,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         setError("");
         try {
             await apiRequest(`/parking/${space._id}/release`, { method: "POST" });
-            setSpaces((current) => current.map((item) => item._id === space._id ? { ...item, status: "available" } : item));
+            setSpaces((current) => current.map((item) => item._id === space._id ? { ...item, status: "available", vehicleNumber: "" } : item));
             setMyReservations((current) => current.filter((reservation) => getReservationSlotId(reservation) !== String(space._id)));
-            setSelectedSpace((current) => current?._id === space._id ? { ...current, status: "available" } : current);
+            setSelectedSpace((current) => current?._id === space._id ? { ...current, status: "available", vehicleNumber: "" } : current);
             setIsReserved(false);
         } catch (requestError) {
             setError(requestError.message);
@@ -254,8 +254,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 });
             }
             setIsReserved(true);
-            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied" } : space));
-            setSelectedSpace((current) => current ? { ...current, status: "occupied" } : current);
+            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied", vehicleNumber: vehicleNumber.trim() } : space));
+            setSelectedSpace((current) => current ? { ...current, status: "occupied", vehicleNumber: vehicleNumber.trim() } : current);
         } catch (requestError) {
             setError(requestError.message);
         } finally {
@@ -292,7 +292,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             {!isLoading && floorSpaces.map((space) => {
                                 const selected = selectedSpace?._id === space._id;
                                 const isMine = myReservations.some((reservation) => getReservationSlotId(reservation) === String(space._id));
-                                return <button key={space._id} type="button" role="listitem" disabled={space.status === "occupied" && !isMine && !isAdmin} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${isMine ? "reserved-by-me" : ""} ${isAdmin && space.status === "occupied" ? "admin-manageable" : ""} ${selected ? "is-selected" : ""}`} aria-label={`${space.slot}, ${isMine ? "reserved by you" : isAdmin && space.status === "occupied" ? "occupied, manageable by admin" : selected ? "selected" : space.status}`}><span>{isMine ? "★" : "P"}</span><b>{space.slot}</b></button>;
+                                return <button key={space._id} type="button" role="listitem" disabled={space.status === "occupied" && !isMine && !isAdmin} onClick={() => chooseSpace(space)} className={`parking-space ${space.status} ${isMine ? "reserved-by-me" : ""} ${isAdmin && space.status === "occupied" ? "admin-manageable" : ""} ${selected ? "is-selected" : ""}`} aria-label={`${space.slot}, ${space.status === "occupied" ? `Booked, vehicle ${space.vehicleNumber || "number unavailable"}` : isMine ? "reserved by you" : selected ? "selected" : "available"}`}>{space.status === "occupied" ? <><span>Booked</span><b>{space.slot}</b><small>{space.vehicleNumber || "Vehicle number unavailable"}</small></> : <><span>{isMine ? "★" : "P"}</span><b>{space.slot}</b></>}</button>;
                             })}
                         </div>
                         <p className="reservation-map-tip">Choose a floor, then tap an available space to select it.</p>

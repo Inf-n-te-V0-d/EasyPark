@@ -139,7 +139,7 @@ const releaseParking = async (req, res) => {
 
     const parking = await Parking.findByIdAndUpdate(
       id,
-      { $set: { status: "available" } },
+      { $set: { status: "available", vehicleNumber: "" } },
       { new: true, runValidators: true },
     );
     if (!parking) {

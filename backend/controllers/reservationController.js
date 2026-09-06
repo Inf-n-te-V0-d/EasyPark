@@ -58,7 +58,7 @@ const addReservation = async (req, res) => {
 
     reservedParking = await Parking.findOneAndUpdate(
       { _id: parkingSlot, status: "available" },
-      { $set: { status: "occupied" } },
+      { $set: { status: "occupied", vehicleNumber } },
       { new: true },
     );
     if (!reservedParking) {
@@ -79,7 +79,7 @@ const addReservation = async (req, res) => {
     res.status(201).json(await savedReservation.populate("parkingSlot"));
   } catch (error) {
     if (reservedParking) {
-      await Parking.findByIdAndUpdate(reservedParking._id, { $set: { status: "available" } });
+      await Parking.findByIdAndUpdate(reservedParking._id, { $set: { status: "available", vehicleNumber: "" } });
     }
     res.status(400).json({ message: error.message });
   }
@@ -117,6 +117,9 @@ const updateReservation = async (req, res) => {
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found!" });
     }
+    if (reservation.status === "cancelled") {
+      await Parking.findByIdAndUpdate(reservation.parkingSlot, { $set: { status: "available", vehicleNumber: "" } });
+    }
     res.status(200).json(reservation);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -134,6 +137,7 @@ const deleteReservation = async (req, res) => {
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found!" });
     }
+    await Parking.findByIdAndUpdate(reservation.parkingSlot, { $set: { status: "available", vehicleNumber: "" } });
     res.status(200).json({ message: "Reservation deleted successfully!" });
   } catch (error) {
     res.status(500).json({ message: error.message });
