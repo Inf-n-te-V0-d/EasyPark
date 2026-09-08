@@ -96,3 +96,8 @@ Branch(Dilshan) : dilsha-feature
 Branch(Milan)  : milan-map-integration  
 Branch(Nethum) : nethum-feature-parking-routes  
 Branch(Nethum) : nethum-feature-jwt-authentication 
+
+# Technologies
+- `Frontend :`  React.js, Vite, Tailwind CSS, CSS
+- `Backend  :`  Node.js, Express.js, Mongoose, Bcrypt, JWT Authentication
+- `Database :`  MongoDB
