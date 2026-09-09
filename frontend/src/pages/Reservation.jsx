@@ -17,6 +17,17 @@ const getToday = () => {
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
 };
+const formatReservationDate = (value) =>
+  new Date(value).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+const formatReservationTime = (value) =>
+  new Date(value).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
 const formatDuration = (minutes) => {
   const hours = Math.floor(minutes / 60);
@@ -74,6 +85,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const floorSpaces = spaces.filter(
     (space) => Number(space.floor) === activeFloor,
   );
+  const now = new Date();
+  const activeReservations = myReservations.filter((reservation) => {
+    const start = new Date(reservation.startTime);
+    const end = new Date(reservation.endTime);
+    return start <= now && now < end;
+  });
+  const upcomingReservations = myReservations.filter(
+    (reservation) => new Date(reservation.startTime) > now,
+  );
 
   useEffect(() => {
     window.scrollTo({
@@ -100,13 +120,12 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
         if (!active) return;
 
-        // Only keep active reservations
-        const activeReservations = reservations.filter((reservation) =>
+        const currentReservations = reservations.filter((reservation) =>
           ["pending", "confirmed", "checked-in"].includes(reservation.status),
         );
 
         setSpaces(parking);
-        setMyReservations(activeReservations);
+        setMyReservations(currentReservations);
 
         if (profile) {
           setVerifiedRole(profile?.role === "admin" ? "admin" : "");
@@ -116,7 +135,14 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         setSelectedSpace((currentSelected) => {
           if (!currentSelected) {
             const ownedSlotIds = new Set(
-              activeReservations.map(getReservationSlotId),
+              currentReservations
+                .filter((reservation) => {
+                  const start = new Date(reservation.startTime);
+                  const end = new Date(reservation.endTime);
+                  const now = new Date();
+                  return start <= now && now < end;
+                })
+                .map(getReservationSlotId),
             );
 
             return (
@@ -136,7 +162,14 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
         if (initialLoad && parking.length > 0) {
           const ownedSlotIds = new Set(
-            activeReservations.map(getReservationSlotId),
+            currentReservations
+              .filter((reservation) => {
+                const start = new Date(reservation.startTime);
+                const end = new Date(reservation.endTime);
+                const now = new Date();
+                return start <= now && now < end;
+              })
+              .map(getReservationSlotId),
           );
 
           const initialSpace =
@@ -191,7 +224,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   };
 
   const chooseSpace = (space) => {
-    const isMine = myReservations.some(
+    const isMine = activeReservations.some(
       (reservation) => getReservationSlotId(reservation) === String(space._id),
     );
     if (space.status === "occupied" && !isMine && !isAdmin) return;
@@ -312,10 +345,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         ),
       );
       setMyReservations((current) =>
-        current.filter(
-          (reservation) =>
-            getReservationSlotId(reservation) !== String(space._id),
-        ),
+        current.filter((reservation) => {
+          const reservationIsActive =
+            new Date(reservation.startTime) <= new Date() &&
+            new Date() < new Date(reservation.endTime);
+          return (
+            getReservationSlotId(reservation) !== String(space._id) ||
+            !reservationIsActive
+          );
+        }),
       );
       setSelectedSpace((current) =>
         current?._id === space._id
@@ -384,29 +422,28 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
       const reservationIsActive = startDateTime <= now && endDateTime > now;
 
-      const newStatus = reservationIsActive ? "occupied" : "available";
-
-      setSpaces((current) =>
-        current.map((space) =>
-          space._id === selectedSpace._id
+      if (reservationIsActive) {
+        setSpaces((current) =>
+          current.map((space) =>
+            space._id === selectedSpace._id
+              ? {
+                  ...space,
+                  status: "occupied",
+                  vehicleNumber: vehicleNumber.trim(),
+                }
+              : space,
+          ),
+        );
+        setSelectedSpace((current) =>
+          current
             ? {
-                ...space,
-                status: newStatus,
-                vehicleNumber: reservationIsActive ? vehicleNumber.trim() : "",
+                ...current,
+                status: "occupied",
+                vehicleNumber: vehicleNumber.trim(),
               }
-            : space,
-        ),
-      );
-
-      setSelectedSpace((current) =>
-        current
-          ? {
-              ...current,
-              status: newStatus,
-              vehicleNumber: reservationIsActive ? vehicleNumber.trim() : "",
-            }
-          : current,
-      );
+            : current,
+        );
+      }
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -522,10 +559,14 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
               {!isLoading &&
                 floorSpaces.map((space) => {
                   const selected = selectedSpace?._id === space._id;
-                  const isMine = myReservations.some(
+                  const activeReservation = activeReservations.find(
                     (reservation) =>
                       getReservationSlotId(reservation) === String(space._id),
                   );
+                  const isMine = Boolean(activeReservation);
+                  const bookedVehicleNumber =
+                    space.vehicleNumber ||
+                    activeReservation?.vehicleDetails?.vehicleNumber;
                   return (
                     <button
                       key={space._id}
@@ -543,7 +584,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                           <span>Booked</span>
                           <b>{space.slot}</b>
                           <small>
-                            {space.vehicleNumber ||
+                            {bookedVehicleNumber ||
                               "Vehicle number unavailable"}
                           </small>
                         </>
@@ -666,7 +707,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
               </div>
             </dl>
             {selectedSpace &&
-            (myReservations.some(
+            (activeReservations.some(
               (reservation) =>
                 getReservationSlotId(reservation) === String(selectedSpace._id),
             ) ||
@@ -680,7 +721,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 {isSaving
                   ? "Releasing..."
                   : isAdmin &&
-                      !myReservations.some(
+                      !activeReservations.some(
                         (reservation) =>
                           getReservationSlotId(reservation) ===
                           String(selectedSpace._id),
@@ -847,6 +888,53 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             )}
           </aside>
         </div>
+        {upcomingReservations.length > 0 && (
+          <section
+            className="reservation-card upcoming-reservations"
+            aria-labelledby="upcoming-reservations-title"
+          >
+            <div className="reservation-card-header">
+              <div>
+                <p className="reservation-label">Your schedule</p>
+                <h2 id="upcoming-reservations-title">Upcoming Reservations</h2>
+              </div>
+              <span className="reservation-availability">
+                {upcomingReservations.length} upcoming
+              </span>
+            </div>
+            <div className="upcoming-reservation-list">
+              {upcomingReservations.map((reservation) => (
+                <article className="upcoming-reservation" key={reservation._id}>
+                  <div>
+                    <strong>
+                      Slot {reservation.parkingSlot?.slot || "Unavailable"}
+                    </strong>
+                    <span>
+                      Level {reservation.parkingSlot?.floor || "Unavailable"}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>
+                      {formatReservationDate(reservation.startTime)}
+                    </strong>
+                    <span>
+                      {formatReservationTime(reservation.startTime)} -{" "}
+                      {formatReservationTime(reservation.endTime)}
+                    </span>
+                  </div>
+                  <div>
+                    <strong>
+                      {reservation.vehicleDetails?.vehicleNumber ||
+                        "Unavailable"}
+                    </strong>
+                    <span>Vehicle number</span>
+                  </div>
+                  <span className="upcoming-reservation-status">Upcoming</span>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
       <Footer onNavigate={onNavigate} />
     </div>
