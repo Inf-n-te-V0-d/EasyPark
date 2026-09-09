@@ -15,6 +15,9 @@ const userSignUpRouter = require("./routes/User/userSignupRoutes");
 // RESERVATION routes
 const reservationRouter = require("./routes/reservation/reservationRoutes");
 
+//Reservation Time counter
+const startReservationScheduler = require("./services/reservationScheduler");
+
 // Parkings routes
 const parkingRouter = require("./routes/parking/parkingRoutes")
 
@@ -95,6 +98,9 @@ async function startServer() {
     }
 
     console.log("Connected to Database!");
+
+    //Start Reservation time scheduler
+    startReservationScheduler();
 
     app.listen(getPort(), () => {
       console.log(`Listening on PORT ${getPort()}.`);
