@@ -22,6 +22,11 @@ const parkingSchema = new mongoose.Schema(
         required: true,
         trim: true,
     },
+    vehicleType: {
+        type: String,
+        enum: ["motorcycle", "three_wheel", "light", "heavy"],
+        default: "light",
+    },
 
     status : {
         type : String,
