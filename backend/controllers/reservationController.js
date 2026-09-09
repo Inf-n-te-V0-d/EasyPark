@@ -39,6 +39,7 @@ const addReservation = async (req, res) => {
       parkingSlot,
       startTime,
       endTime,
+      source = "scheduled",
       vehicleDetails = {},
       totalAmount = 0,
     } = req.body;
@@ -50,7 +51,14 @@ const addReservation = async (req, res) => {
       return res.status(400).json({ message: "Vehicle number is required." });
     }
     if (!vehicleTypes.includes(vehicleType)) {
-      return res.status(400).json({ message: "A valid vehicle type is required." });
+      return res
+        .status(400)
+        .json({ message: "A valid vehicle type is required." });
+    }
+    if (!["instant", "scheduled"].includes(source)) {
+      return res
+        .status(400)
+        .json({ message: "A valid reservation source is required." });
     }
 
     if (
@@ -66,7 +74,8 @@ const addReservation = async (req, res) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    const start = new Date(startTime);
+    const serverNow = new Date();
+    const start = source === "instant" ? serverNow : new Date(startTime);
     const end = new Date(endTime);
     if (
       Number.isNaN(start.getTime()) ||
@@ -85,11 +94,9 @@ const addReservation = async (req, res) => {
       endTime: { $gt: start },
     });
     if (overlappingReservation) {
-      return res
-        .status(409)
-        .json({
-          message: "That parking space is already reserved for this time.",
-        });
+      return res.status(409).json({
+        message: "That parking space is already reserved for this time.",
+      });
     }
 
     const parking = await Parking.findById(parkingSlot);
@@ -97,7 +104,10 @@ const addReservation = async (req, res) => {
       return res.status(404).json({ message: "Parking space not found." });
     }
     if ((parking.vehicleType || "light") !== vehicleType) {
-      return res.status(409).json({ message: "That parking space is not suitable for the selected vehicle type." });
+      return res.status(409).json({
+        message:
+          "That parking space is not suitable for the selected vehicle type.",
+      });
     }
 
     const isActive = start <= new Date() && end > new Date();
@@ -129,6 +139,7 @@ const addReservation = async (req, res) => {
       parkingSlot,
       startTime: start,
       endTime: end,
+      source,
       vehicleDetails: { ...vehicleDetails, vehicleNumber, vehicleType },
       totalAmount: Number(totalAmount) || 0,
       pin: String(Math.floor(100000 + Math.random() * 900000)),
