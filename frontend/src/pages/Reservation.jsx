@@ -3,6 +3,11 @@ import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
+import {
+    isValidVehicleNumber,
+    normalizeVehicleNumber,
+    vehicleNumberErrorMessage,
+} from "../lib/vehicleNumber";
 
 const parkedVehicleLocation = {
   name: "My parked vehicle",
@@ -193,28 +198,56 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             setActiveFloor(Number(initialSpace.floor));
           }
         }
-      } catch (requestError) {
-        if (active) {
-          setError(requestError.message);
+        if (!selectedSpace) return;
+        const normalizedVehicleNumber = normalizeVehicleNumber(vehicleNumber);
+        if (!normalizedVehicleNumber) {
+            setVehicleNumberError("Please enter your vehicle number before reserving.");
+            return;
         }
-      } finally {
-        if (active && initialLoad) {
-          setIsLoading(false);
+        if (!isValidVehicleNumber(normalizedVehicleNumber)) {
+            setVehicleNumberError(vehicleNumberErrorMessage);
+            return;
+        }
+        setVehicleNumberError("");
+        if (!durationMinutes) {
+            setError("Please choose a valid arrival time range.");
+            return;
         }
       }
     };
 
-    // Initial load
-    loadParkingData(true);
-
-    // Refresh parking + reservation status every 5 seconds
-    const interval = setInterval(() => {
-      loadParkingData(false);
-    }, 5000);
-
-    return () => {
-      active = false;
-      clearInterval(interval);
+        setIsSaving(true);
+        setError("");
+        try {
+            const createdReservation = await apiRequest("/reservation", {
+                method: "POST",
+                body: JSON.stringify({
+                    user: user._id,
+                    parkingSlot: selectedSpace._id,
+                    vehicleDetails: { vehicleNumber: normalizedVehicleNumber },
+                    startTime: startDateTime.toISOString(),
+                    endTime: endDateTime.toISOString(),
+                    totalAmount: 0,
+                }),
+            });
+            setMyReservations((current) => [createdReservation, ...current]);
+            if (Number.isFinite(Number(selectedSpace.latitude)) && Number.isFinite(Number(selectedSpace.longitude))) {
+                saveVehicleLocation({
+                    lat: Number(selectedSpace.latitude),
+                    lng: Number(selectedSpace.longitude),
+                    label: `Reserved vehicle · ${selectedSpace.slot}`,
+                    slot: selectedSpace.slot,
+                    floor: `Level ${selectedSpace.floor}`,
+                });
+            }
+            setIsReserved(true);
+            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied", vehicleNumber: normalizedVehicleNumber } : space));
+            setSelectedSpace((current) => current ? { ...current, status: "occupied", vehicleNumber: normalizedVehicleNumber } : current);
+        } catch (requestError) {
+            setError(requestError.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
   }, [currentUserId]);
   const copySlotToForm = (space) => {
@@ -930,27 +963,41 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             Cancel
                           </button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </section>
-            )}
-          </aside>
-        </div>
-        {upcomingReservations.length > 0 && (
-          <section
-            className="reservation-card upcoming-reservations"
-            aria-labelledby="upcoming-reservations-title"
-          >
-            <div className="reservation-card-header">
-              <div>
-                <p className="reservation-label">Your schedule</p>
-                <h2 id="upcoming-reservations-title">Upcoming Reservations</h2>
-              </div>
-              <span className="reservation-availability">
-                {upcomingReservations.length} upcoming
-              </span>
+                        <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
+                        <input id="vehicle-number" required value={vehicleNumber} onChange={(event) => { const normalizedValue = normalizeVehicleNumber(event.target.value); setVehicleNumber(normalizedValue); setVehicleNumberError(normalizedValue && !isValidVehicleNumber(normalizedValue) ? vehicleNumberErrorMessage : ""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
+                        {vehicleNumberError && <p className="user-alert user-alert-error mt-2" role="alert">{vehicleNumberError}</p>}
+                        <dl className="reservation-details reservation-arrival-details">
+                            <div>
+                                <dt>Arrival date</dt>
+                                <dd className="reservation-date-selector"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3" /><path d="M8 3v4m8-4v4M3 10h18" /></svg><input type="date" value={arrivalDate} min={getToday()} onChange={(event) => setArrivalDate(event.target.value)} /></dd>
+                            </div>
+                            <div className="reservation-time-range">
+                                <label className="reservation-time-selector"><span>From</span><div><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg><input type="time" value={arrivalStart} onChange={(event) => setArrivalStart(event.target.value)} /></div></label>
+                                <span aria-hidden="true">-</span>
+                                <label className="reservation-time-selector"><span>To</span><div><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" /><path d="M12 7v5l3 2" /></svg><input type="time" value={arrivalEnd} onChange={(event) => setArrivalEnd(event.target.value)} /></div></label>
+                            </div>
+                            <div><dt>Duration</dt><dd>{durationMinutes ? formatDuration(durationMinutes) : "Choose a valid time range"}</dd></div>
+                        </dl>
+                        {selectedSpace && (myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) || (isAdmin && selectedSpace.status === "occupied")) ? <button type="button" className="reservation-button reservation-release-button" disabled={isSaving} onClick={() => releaseSpace(selectedSpace)}>{isSaving ? "Releasing..." : isAdmin && !myReservations.some((reservation) => getReservationSlotId(reservation) === String(selectedSpace._id)) ? "Release occupied slot" : "Release my slot"}</button> : <button type="button" className="reservation-button" disabled={!selectedSpace || selectedSpace.status === "occupied" || isSaving} onClick={reserveSpace}>{isSaving ? "Reserving..." : isReserved ? "Space Reserved" : "Reserve this space"}</button>}
+                        {isReserved && <p className="reservation-success" role="status">Your space {selectedSpace?.slot} is reserved. See you soon!</p>}
+                        <p className="reservation-note">You can update or cancel your reservation before arrival.</p>
+                        {isAdmin && <section className="slot-admin-tools" aria-labelledby="slot-admin-title">
+                            <div className="slot-admin-heading"><div><span>Administrator</span><h3 id="slot-admin-title">Manage parking slots</h3></div><button type="button" onClick={openSlotManager}>Manage slots</button></div>
+                            {adminMessage && <p className="slot-admin-message" role="status">{adminMessage}</p>}
+                            {isManagingSlot && <div className="slot-admin-panel"><label className="slot-admin-action">Choose action<select value={adminAction} onChange={chooseAdminAction}><option value="add">Add a slot</option><option value="edit" disabled={!selectedSpace}>Edit selected slot</option><option value="delete" disabled={!selectedSpace}>Delete selected slot</option></select></label>
+                            {adminAction !== "delete" ? <form className="slot-admin-form" onSubmit={saveSlot}>
+                                <label>Slot name<input required name="slot" value={slotForm.slot} onChange={updateSlotForm} placeholder="A-05" /></label>
+                                <label>Floor<input required min="1" name="floor" type="number" value={slotForm.floor} onChange={updateSlotForm} /></label>
+                                <label>Latitude<input required name="latitude" type="number" step="any" value={slotForm.latitude} onChange={updateSlotForm} /></label>
+                                <label>Longitude<input required name="longitude" type="number" step="any" value={slotForm.longitude} onChange={updateSlotForm} /></label>
+                                <label>Status<select name="status" value={slotForm.status} onChange={updateSlotForm}><option value="available">Available</option><option value="occupied">Occupied</option></select></label>
+                                <div className="slot-admin-actions"><button type="submit">{isCreatingSlot ? "Create slot" : "Save changes"}</button><button type="button" onClick={() => { setIsManagingSlot(false); setIsCreatingSlot(false); }}>Cancel</button></div>
+                            </form> : <div className="slot-admin-delete-panel"><p>Delete <b>{selectedSpace?.slot}</b> from Level {selectedSpace?.floor}? This cannot be undone.</p><div className="slot-admin-actions"><button type="button" className="slot-admin-delete" onClick={deleteSlot}>Delete slot</button><button type="button" onClick={() => setIsManagingSlot(false)}>Cancel</button></div></div>}</div>}
+                        </section>}
+                    </aside>
+                </div>
+              </main>
+              <Footer onNavigate={onNavigate} />
             </div>
             <div className="upcoming-reservation-list">
               {upcomingReservations.map((reservation) => (
