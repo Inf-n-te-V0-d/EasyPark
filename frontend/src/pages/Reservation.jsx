@@ -28,6 +28,12 @@ const formatReservationTime = (value) =>
     hour: "numeric",
     minute: "2-digit",
   });
+const vehicleTypeOptions = [
+  { value: "motorcycle", label: "🏍 Motorcycle" },
+  { value: "three_wheel", label: "🛺 Three Wheel" },
+  { value: "light", label: "🚗 Light Vehicle" },
+  { value: "heavy", label: "🚌 Heavy Vehicle" },
+];
 
 const formatDuration = (minutes) => {
   const hours = Math.floor(minutes / 60);
@@ -39,6 +45,7 @@ const emptySlotForm = {
   floor: "1",
   latitude: "6.9271",
   longitude: "79.8612",
+  vehicleType: "light",
   status: "available",
 };
 
@@ -55,6 +62,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
+  const [vehicleType, setVehicleType] = useState("light");
   const [vehicleNumberError, setVehicleNumberError] = useState("");
   const [arrivalDate, setArrivalDate] = useState(getToday);
   const [arrivalStart, setArrivalStart] = useState("09:00");
@@ -83,7 +91,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     ),
   ].sort((a, b) => a - b);
   const floorSpaces = spaces.filter(
-    (space) => Number(space.floor) === activeFloor,
+    (space) =>
+      Number(space.floor) === activeFloor &&
+      (space.vehicleType || "light") === vehicleType,
   );
   const now = new Date();
   const activeReservations = myReservations.filter((reservation) => {
@@ -213,6 +223,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
       floor: String(space?.floor || 1),
       latitude: String(space?.latitude || ""),
       longitude: String(space?.longitude || ""),
+      vehicleType: space?.vehicleType || "light",
       status: space?.status || "available",
     });
   };
@@ -231,6 +242,13 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     setSelectedSpace(space);
     setActiveFloor(Number(space.floor));
     if (isAdmin && !isCreatingSlot) copySlotToForm(space);
+    setIsReserved(false);
+    setError("");
+  };
+
+  const chooseVehicleType = ({ target }) => {
+    setVehicleType(target.value);
+    setSelectedSpace(null);
     setIsReserved(false);
     setError("");
   };
@@ -396,7 +414,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
         body: JSON.stringify({
           user: user._id,
           parkingSlot: selectedSpace._id,
-          vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
+          vehicleDetails: {
+            vehicleNumber: vehicleNumber.trim(),
+            vehicleType,
+          },
           startTime: startDateTime.toISOString(),
           endTime: endDateTime.toISOString(),
           totalAmount: 0,
@@ -497,6 +518,21 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 spaces available
               </span>
             </div>
+            <label className="reservation-label" htmlFor="vehicle-type">
+              Vehicle type
+            </label>
+            <select
+              id="vehicle-type"
+              value={vehicleType}
+              onChange={chooseVehicleType}
+              className="reservation-vehicle-type"
+            >
+              {vehicleTypeOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
             {floors.length > 0 && (
               <div
                 className="parking-floor-selector"
@@ -832,6 +868,20 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             value={slotForm.longitude}
                             onChange={updateSlotForm}
                           />
+                        </label>
+                        <label>
+                          Vehicle type
+                          <select
+                            name="vehicleType"
+                            value={slotForm.vehicleType}
+                            onChange={updateSlotForm}
+                          >
+                            {vehicleTypeOptions.map((option) => (
+                              <option value={option.value} key={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
                         </label>
                         <label>
                           Status
