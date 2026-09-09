@@ -5,6 +5,11 @@ import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
+import {
+    isValidVehicleNumber,
+    normalizeVehicleNumber,
+    vehicleNumberErrorMessage,
+} from "../lib/vehicleNumber";
 
 const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     const session = getSession();
@@ -134,8 +139,13 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
     const confirmScannedReservation = async () => {
         if (!pendingSlot) return;
-        if (!vehicleNumber.trim()) {
+        const normalizedVehicleNumber = normalizeVehicleNumber(vehicleNumber);
+        if (!normalizedVehicleNumber) {
             setVehicleNumberError("Please enter your vehicle number before reserving.");
+            return;
+        }
+        if (!isValidVehicleNumber(normalizedVehicleNumber)) {
+            setVehicleNumberError(vehicleNumberErrorMessage);
             return;
         }
 
@@ -149,7 +159,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 method: "POST",
                 body: JSON.stringify({
                     parkingSlot: pendingSlot._id,
-                    vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
+                    vehicleDetails: { vehicleNumber: normalizedVehicleNumber },
                     startTime: startTime.toISOString(),
                     endTime: endTime.toISOString(),
                     totalAmount: 0,
@@ -246,7 +256,7 @@ const QrScanner = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                         <div className="scan-qr-reservation-form">
                             <p className="reservation-label">{pendingSlot ? `Slot scanned: ${pendingSlot.slot}` : "Scan an available slot to reserve"}</p>
                             <label className="reservation-label" htmlFor="scanned-vehicle-number">Vehicle number</label>
-                            <input id="scanned-vehicle-number" autoFocus required value={vehicleNumber} onChange={(event) => { setVehicleNumber(event.target.value); setVehicleNumberError(""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
+                            <input id="scanned-vehicle-number" autoFocus required value={vehicleNumber} onChange={(event) => { const normalizedValue = normalizeVehicleNumber(event.target.value); setVehicleNumber(normalizedValue); setVehicleNumberError(normalizedValue && !isValidVehicleNumber(normalizedValue) ? vehicleNumberErrorMessage : ""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
                             {vehicleNumberError && <p className="user-alert user-alert-error mt-2" role="alert">{vehicleNumberError}</p>}
                             <button type="button" className="scan-park-button scan-park-button-primary mt-3 w-full" onClick={confirmScannedReservation} disabled={!pendingSlot}>
                                 Reserve slot
