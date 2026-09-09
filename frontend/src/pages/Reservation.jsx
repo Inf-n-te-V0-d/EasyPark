@@ -681,8 +681,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
               required
               value={vehicleNumber}
               onChange={(event) => {
-                setVehicleNumber(event.target.value);
-                setVehicleNumberError("");
+                const normalizedValue = normalizeVehicleNumber(
+                  event.target.value,
+                );
+                setVehicleNumber(normalizedValue);
+                setVehicleNumberError(
+                  normalizedValue && !isValidVehicleNumber(normalizedValue)
+                    ? vehicleNumberErrorMessage
+                    : "",
+                );
               }}
               placeholder="Enter vehicle number"
               className="scan-park-input mt-2"
