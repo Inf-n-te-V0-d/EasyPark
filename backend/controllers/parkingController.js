@@ -2,11 +2,12 @@ const Parking = require("../models/Parking");
 const Reservation = require("../models/Reservation");
 const mongoose = require("mongoose");
 
-const parkingFields = ({ slot, floor, latitude, longitude, status }) => ({
+const parkingFields = ({ slot, floor, latitude, longitude, status, vehicleType }) => ({
   slot: typeof slot === "string" ? slot.trim().toUpperCase() : slot,
   floor: Number(floor),
   latitude: String(latitude).trim(),
   longitude: String(longitude).trim(),
+  ...(vehicleType ? { vehicleType } : {}),
   ...(status ? { status } : {}),
 });
 
