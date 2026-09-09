@@ -3,6 +3,11 @@ import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 import BackButton from "../components/BackButton";
 import { apiRequest, getSession, saveVehicleLocation } from "../lib/api";
+import {
+    isValidVehicleNumber,
+    normalizeVehicleNumber,
+    vehicleNumberErrorMessage,
+} from "../lib/vehicleNumber";
 
 const parkedVehicleLocation = {
     name: "My parked vehicle",
@@ -219,8 +224,13 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
             return;
         }
         if (!selectedSpace) return;
-        if (!vehicleNumber.trim()) {
+        const normalizedVehicleNumber = normalizeVehicleNumber(vehicleNumber);
+        if (!normalizedVehicleNumber) {
             setVehicleNumberError("Please enter your vehicle number before reserving.");
+            return;
+        }
+        if (!isValidVehicleNumber(normalizedVehicleNumber)) {
+            setVehicleNumberError(vehicleNumberErrorMessage);
             return;
         }
         setVehicleNumberError("");
@@ -237,7 +247,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 body: JSON.stringify({
                     user: user._id,
                     parkingSlot: selectedSpace._id,
-                    vehicleDetails: { vehicleNumber: vehicleNumber.trim() },
+                    vehicleDetails: { vehicleNumber: normalizedVehicleNumber },
                     startTime: startDateTime.toISOString(),
                     endTime: endDateTime.toISOString(),
                     totalAmount: 0,
@@ -254,8 +264,8 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 });
             }
             setIsReserved(true);
-            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied", vehicleNumber: vehicleNumber.trim() } : space));
-            setSelectedSpace((current) => current ? { ...current, status: "occupied", vehicleNumber: vehicleNumber.trim() } : current);
+            setSpaces((current) => current.map((space) => space._id === selectedSpace._id ? { ...space, status: "occupied", vehicleNumber: normalizedVehicleNumber } : space));
+            setSelectedSpace((current) => current ? { ...current, status: "occupied", vehicleNumber: normalizedVehicleNumber } : current);
         } catch (requestError) {
             setError(requestError.message);
         } finally {
@@ -311,7 +321,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                             <small>{parkedVehicleLocation.destination}</small>
                         </div>
                         <label className="reservation-label" htmlFor="vehicle-number">Vehicle number</label>
-                        <input id="vehicle-number" required value={vehicleNumber} onChange={(event) => { setVehicleNumber(event.target.value); setVehicleNumberError(""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
+                        <input id="vehicle-number" required value={vehicleNumber} onChange={(event) => { const normalizedValue = normalizeVehicleNumber(event.target.value); setVehicleNumber(normalizedValue); setVehicleNumberError(normalizedValue && !isValidVehicleNumber(normalizedValue) ? vehicleNumberErrorMessage : ""); }} placeholder="Enter vehicle number" className="scan-park-input mt-2" maxLength={20} />
                         {vehicleNumberError && <p className="user-alert user-alert-error mt-2" role="alert">{vehicleNumberError}</p>}
                         <dl className="reservation-details reservation-arrival-details">
                             <div>
