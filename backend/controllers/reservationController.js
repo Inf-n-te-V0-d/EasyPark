@@ -2,6 +2,7 @@ const Reservation = require("../models/Reservation");
 const Parking = require("../models/Parking");
 const User = require("../models/User");
 const mongoose = require("mongoose");
+const vehicleTypes = ["motorcycle", "three_wheel", "light", "heavy"];
 
 //GET all reservations
 const getReservations = async (req, res) => {
@@ -43,9 +44,13 @@ const addReservation = async (req, res) => {
     } = req.body;
     const user = req.user._id;
     const vehicleNumber = String(vehicleDetails.vehicleNumber || "").trim();
+    const vehicleType = String(vehicleDetails.vehicleType || "light");
 
     if (!vehicleNumber) {
       return res.status(400).json({ message: "Vehicle number is required." });
+    }
+    if (!vehicleTypes.includes(vehicleType)) {
+      return res.status(400).json({ message: "A valid vehicle type is required." });
     }
 
     if (
@@ -87,6 +92,14 @@ const addReservation = async (req, res) => {
         });
     }
 
+    const parking = await Parking.findById(parkingSlot);
+    if (!parking) {
+      return res.status(404).json({ message: "Parking space not found." });
+    }
+    if ((parking.vehicleType || "light") !== vehicleType) {
+      return res.status(409).json({ message: "That parking space is not suitable for the selected vehicle type." });
+    }
+
     const isActive = start <= new Date() && end > new Date();
     if (isActive) {
       reservedParking = await Parking.findOneAndUpdate(
@@ -100,11 +113,11 @@ const addReservation = async (req, res) => {
           .json({ message: "That parking space is no longer available." });
       }
     } else {
-      const parking = await Parking.findOne({
+      const availableParking = await Parking.findOne({
         _id: parkingSlot,
         status: "available",
       });
-      if (!parking) {
+      if (!availableParking) {
         return res
           .status(409)
           .json({ message: "That parking space is no longer available." });
@@ -116,7 +129,7 @@ const addReservation = async (req, res) => {
       parkingSlot,
       startTime: start,
       endTime: end,
-      vehicleDetails: { ...vehicleDetails, vehicleNumber },
+      vehicleDetails: { ...vehicleDetails, vehicleNumber, vehicleType },
       totalAmount: Number(totalAmount) || 0,
       pin: String(Math.floor(100000 + Math.random() * 900000)),
       status: "confirmed",

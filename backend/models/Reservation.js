@@ -29,6 +29,11 @@ const reservationSchema = new mongoose.Schema({
             required: [true, "Vehicle number is required."],
             trim: true,
         },
+        vehicleType: {
+            type: String,
+            enum: ["motorcycle", "three_wheel", "light", "heavy"],
+            default: "light",
+        },
         prefix: String,
         suffix: String
     },
