@@ -682,6 +682,87 @@ html.dark .auth-visual-copy {
   border-top: 1px solid var(--color-border);
   padding-top: 1rem;
 }
+.scan-reservation-modal-backdrop {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.58);
+}
+.scan-reservation-modal {
+  width: min(100%, 30rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  background: var(--color-white);
+  color: var(--color-dark);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);
+  animation: scan-park-enter 180ms ease-out both;
+}
+.scan-reservation-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.scan-reservation-modal h2 {
+  margin: 0.35rem 0 0;
+  font-size: clamp(1.25rem, 3vw, 1.7rem);
+  line-height: 1.15;
+}
+.scan-modal-close {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-dark);
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.scan-modal-close:hover {
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+}
+.scan-modal-description {
+  margin: 0.8rem 0 1.25rem;
+  color: var(--color-text);
+  font-size: 0.88rem;
+}
+.scan-feedback-icon {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  margin-bottom: 0.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #b45309;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+.scan-feedback-error .scan-feedback-icon {
+  background: color-mix(in srgb, #ef4444 14%, transparent);
+  color: #dc2626;
+}
+.scan-feedback-actions {
+  display: flex;
+  gap: 0.7rem;
+}
+.scan-feedback-actions .scan-park-button {
+  flex: 1;
+}
+.scan-release-label {
+  display: block;
+  margin-top: 1.1rem;
+}
 .scan-park-qr-preview {
   display: grid;
   min-height: 15.25rem;
@@ -896,6 +977,12 @@ html.dark .scan-camera-shell {
     flex-direction: column;
   }
   .scan-park-actions .scan-park-button {
+    width: 100%;
+  }
+  .scan-feedback-actions {
+    flex-direction: column;
+  }
+  .scan-feedback-actions .scan-park-button {
     width: 100%;
   }
   .scan-park-qr-preview {
