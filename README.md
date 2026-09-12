@@ -2,7 +2,7 @@
 
 EasyPark is a React and Express parking application backed by MongoDB.
 
-# LET'S GOOOOOOOOOOOOOOO!!!!
+# LET'S GOOOOOOOOOOOOOOO!!!!!
 
 # To run backend server = npm run dev
 
