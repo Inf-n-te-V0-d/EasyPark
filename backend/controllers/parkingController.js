@@ -20,8 +20,40 @@ const requireAdminAccess = (req, res) => {
 //GET all parkings
 const getParkings = async (req, res) => {
   try {
+    const activeReservations = await Reservation.find({
+      status: { $in: ["pending", "confirmed", "checked-in"] },
+    }).select("parkingSlot vehicleDetails");
+
+    const reservedSlots = new Map();
+    for (const reservation of activeReservations) {
+      const slotId = reservation.parkingSlot?.toString();
+      if (!slotId) continue;
+      reservedSlots.set(slotId, reservation.vehicleDetails?.vehicleNumber || "");
+    }
+
     const parking = await Parking.find().sort({ createdAt: -1 });
-    res.status(200).json(parking);
+    const syncedParking = parking.map((space) => {
+      const slotId = String(space._id);
+      if (reservedSlots.has(slotId)) {
+        return {
+          ...space.toObject(),
+          status: "occupied",
+          vehicleNumber: reservedSlots.get(slotId) || space.vehicleNumber || "",
+        };
+      }
+
+      if (space.status === "occupied") {
+        return {
+          ...space.toObject(),
+          status: "available",
+          vehicleNumber: "",
+        };
+      }
+
+      return space.toObject();
+    });
+
+    res.status(200).json(syncedParking);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

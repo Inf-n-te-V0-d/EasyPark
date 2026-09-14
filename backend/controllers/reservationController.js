@@ -110,28 +110,15 @@ const addReservation = async (req, res) => {
       });
     }
 
-    const isActive = start <= new Date() && end > new Date();
-    if (isActive) {
-      reservedParking = await Parking.findOneAndUpdate(
-        { _id: parkingSlot, status: "available" },
-        { $set: { status: "occupied", vehicleNumber } },
-        { new: true },
-      );
-      if (!reservedParking) {
-        return res
-          .status(409)
-          .json({ message: "That parking space is no longer available." });
-      }
-    } else {
-      const availableParking = await Parking.findOne({
-        _id: parkingSlot,
-        status: "available",
-      });
-      if (!availableParking) {
-        return res
-          .status(409)
-          .json({ message: "That parking space is no longer available." });
-      }
+    reservedParking = await Parking.findOneAndUpdate(
+      { _id: parkingSlot, status: "available" },
+      { $set: { status: "occupied", vehicleNumber } },
+      { new: true },
+    );
+    if (!reservedParking) {
+      return res
+        .status(409)
+        .json({ message: "That parking space is no longer available." });
     }
 
     const reservation = new Reservation({

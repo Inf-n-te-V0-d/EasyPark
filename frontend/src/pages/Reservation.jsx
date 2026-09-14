@@ -104,11 +104,18 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const activeReservations = myReservations.filter((reservation) => {
     const start = new Date(reservation.startTime);
     const end = new Date(reservation.endTime);
-    return start <= now && now < end;
+    return (
+      ["pending", "confirmed", "checked-in"].includes(reservation.status) &&
+      start <= now &&
+      now < end
+    );
   });
-  const upcomingReservations = myReservations.filter(
-    (reservation) => new Date(reservation.startTime) > now,
-  );
+  const upcomingReservations = myReservations.filter((reservation) => {
+    return (
+      ["pending", "confirmed", "checked-in"].includes(reservation.status) &&
+      new Date(reservation.startTime) > now
+    );
+  });
 
   useEffect(() => {
     window.scrollTo({
@@ -135,11 +142,49 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
 
         if (!active) return;
 
-        const currentReservations = reservations.filter((reservation) =>
-          ["pending", "confirmed", "checked-in"].includes(reservation.status),
+        const currentReservations = (Array.isArray(reservations) ? reservations : []).filter(
+          (reservation) =>
+            ["pending", "confirmed", "checked-in"].includes(reservation.status),
         );
 
-        setSpaces(parking);
+        let allActiveReservations = currentReservations;
+        if (profile?.role === "admin") {
+          const allReservations = await apiRequest("/reservation");
+          allActiveReservations = (Array.isArray(allReservations) ? allReservations : []).filter(
+            (reservation) =>
+              ["pending", "confirmed", "checked-in"].includes(reservation.status),
+          );
+        }
+
+        const reservedSlotMap = new Map(
+          allActiveReservations.map((reservation) => [
+            String(getReservationSlotId(reservation)),
+            reservation.vehicleDetails?.vehicleNumber || "",
+          ]),
+        );
+
+        const syncedParking = parking.map((space) => {
+          const slotId = String(space._id);
+          if (reservedSlotMap.has(slotId)) {
+            return {
+              ...space,
+              status: "occupied",
+              vehicleNumber: reservedSlotMap.get(slotId) || space.vehicleNumber || "",
+            };
+          }
+
+          if (space.status === "occupied") {
+            return {
+              ...space,
+              status: "available",
+              vehicleNumber: "",
+            };
+          }
+
+          return space;
+        });
+
+        setSpaces(syncedParking);
         setMyReservations(currentReservations);
 
         if (profile) {
@@ -237,8 +282,10 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   };
 
   const chooseSpace = (space) => {
-    const isMine = activeReservations.some(
-      (reservation) => getReservationSlotId(reservation) === String(space._id),
+    const isMine = myReservations.some(
+      (reservation) =>
+        ["pending", "confirmed", "checked-in"].includes(reservation.status) &&
+        getReservationSlotId(reservation) === String(space._id),
     );
     if (space.status === "occupied" && !isMine && !isAdmin) return;
     setSelectedSpace(space);
@@ -366,13 +413,9 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
       );
       setMyReservations((current) =>
         current.filter((reservation) => {
-          const reservationIsActive =
-            new Date(reservation.startTime) <= new Date() &&
-            new Date() < new Date(reservation.endTime);
-          return (
-            getReservationSlotId(reservation) !== String(space._id) ||
-            !reservationIsActive
-          );
+          const isThisSlotReservation =
+            getReservationSlotId(reservation) === String(space._id);
+          return !isThisSlotReservation;
         }),
       );
       setSelectedSpace((current) =>
@@ -445,33 +488,26 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
       }
       setIsReserved(true);
 
-      // Check whether the reservation is currently active
-      const now = new Date();
-
-      const reservationIsActive = startDateTime <= now && endDateTime > now;
-
-      if (reservationIsActive) {
-        setSpaces((current) =>
-          current.map((space) =>
-            space._id === selectedSpace._id
-              ? {
-                  ...space,
-                  status: "occupied",
-                  vehicleNumber: normalizedVehicleNumber,
-                }
-              : space,
-          ),
-        );
-        setSelectedSpace((current) =>
-          current
+      setSpaces((current) =>
+        current.map((space) =>
+          space._id === selectedSpace._id
             ? {
-                ...current,
+                ...space,
                 status: "occupied",
                 vehicleNumber: normalizedVehicleNumber,
               }
-            : current,
-        );
-      }
+            : space,
+        ),
+      );
+      setSelectedSpace((current) =>
+        current
+          ? {
+              ...current,
+              status: "occupied",
+              vehicleNumber: normalizedVehicleNumber,
+            }
+          : current,
+      );
     } catch (requestError) {
       setError(requestError.message);
     } finally {
@@ -757,8 +793,11 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
               </div>
             </dl>
             {selectedSpace &&
-            (activeReservations.some(
+            (myReservations.some(
               (reservation) =>
+                ["pending", "confirmed", "checked-in"].includes(
+                  reservation.status,
+                ) &&
                 getReservationSlotId(reservation) === String(selectedSpace._id),
             ) ||
               (isAdmin && selectedSpace.status === "occupied")) ? (
@@ -771,10 +810,13 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 {isSaving
                   ? "Releasing..."
                   : isAdmin &&
-                      !activeReservations.some(
+                      !myReservations.some(
                         (reservation) =>
+                          ["pending", "confirmed", "checked-in"].includes(
+                            reservation.status,
+                          ) &&
                           getReservationSlotId(reservation) ===
-                          String(selectedSpace._id),
+                            String(selectedSpace._id),
                       )
                     ? "Release occupied slot"
                     : "Release my slot"}
