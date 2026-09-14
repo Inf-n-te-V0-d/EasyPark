@@ -19,11 +19,16 @@ EasyPark is a React and Express parking application backed by MongoDB.
 ### 9. npm install jsonwebtoken 
 ### 10. npm install node-cron
 
-
+##
+##
 ## Then create .env file inside backend folder
 ### inside that file create local environment variables 
-### 1. MONGO_LOCAL=your mongo db url
-### 2. PORT=port name
+- `MONGO_LOCAL`=your mongo db url
+- `PORT`=port name
+- `FRONTEND_URL`=your frontend url
+- `AUTH_SECRET`=your secret
+- `TURNSTILE_SECRET_KEY`=your key
+
 
 ## Run locally
 
@@ -83,8 +88,15 @@ Border Radius: 12px
 
 ## To run frontend server = npm run dev
 ## Just install this = npm install 
+## Frontend .env configuration
+- `VITE_API_URL`=your backend url
+- `VITE_ORS_API_KEY`=your open route service api key
+- `VITE_GOOGLE_MAPS_API_KEY`=your google maps embed api key
+- `VITE_API_URL`=your api end point
+- `VITE_TURNSTILE_SITE_KEY`=your key
 ## After the "git pull" enter "npm install" to get the dependencies of Tailwindcss
-
+##
+##
 
 # BRANCHES (Add Branches HERE!!!!)
 Branch(Milan) : milan-feature      
