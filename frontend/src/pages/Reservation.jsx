@@ -78,6 +78,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const [adminAction, setAdminAction] = useState("edit");
   const [adminMessage, setAdminMessage] = useState("");
   const [activeFloor, setActiveFloor] = useState(1);
+  const [confirmDialog, setConfirmDialog] = useState(null);
   //const startDateTime = new Date(`${arrivalDate}T${arrivalStart}`);
   //const endDateTime = new Date(`${arrivalDate}T${arrivalEnd}`);
   //const durationMinutes = Number.isFinite(startDateTime.getTime()) && Number.isFinite(endDateTime.getTime()) && endDateTime > startDateTime
@@ -431,6 +432,15 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }
   };
 
+  const openReleaseConfirmation = (space) => {
+    setConfirmDialog({
+      title: "Release this slot?",
+      message: `Are you sure you want to release slot ${space?.slot || "this slot"}? This will cancel the current reservation.`,
+      confirmLabel: "Release slot",
+      onConfirm: () => releaseSpace(space),
+    });
+  };
+
   const reserveSpace = async () => {
     const user = getSession();
     if (!user?._id) {
@@ -515,6 +525,35 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }
   };
 
+  const openReserveConfirmation = () => {
+    if (!selectedSpace) return;
+
+    const normalizedVehicleNumber = normalizeVehicleNumber(vehicleNumber);
+    if (!normalizedVehicleNumber) {
+      setVehicleNumberError("Please enter your vehicle number before reserving.");
+      return;
+    }
+    if (!isValidVehicleNumber(normalizedVehicleNumber)) {
+      setVehicleNumberError(vehicleNumberErrorMessage);
+      return;
+    }
+    if (!durationMinutes) {
+      setError("Please choose a valid arrival time range.");
+      return;
+    }
+
+    setVehicleNumberError("");
+    setError("");
+
+    const summary = `${selectedSpace.slot} for ${normalizedVehicleNumber} from ${formatReservationTime(startDateTime)} to ${formatReservationTime(endDateTime)} on ${formatReservationDate(startDateTime)}`;
+    setConfirmDialog({
+      title: "Confirm reservation?",
+      message: `Reserve slot ${summary}?`,
+      confirmLabel: "Reserve slot",
+      onConfirm: () => reserveSpace(),
+    });
+  };
+
   return (
     <div className="reservation-page min-h-screen">
       <Navbar
@@ -524,6 +563,60 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
       />
       <main className="reservation-main">
         <BackButton onNavigate={onNavigate} />
+        {confirmDialog && (
+          <div
+            className="site-confirm-modal-backdrop"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setConfirmDialog(null);
+              }
+            }}
+          >
+            <section
+              className="site-confirm-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="confirm-dialog-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="site-confirm-modal-header">
+                <div>
+                  <p className="reservation-label">Confirm action</p>
+                  <h2 id="confirm-dialog-title">{confirmDialog.title}</h2>
+                </div>
+                <button
+                  type="button"
+                  className="site-confirm-close"
+                  aria-label="Close confirmation"
+                  onClick={() => setConfirmDialog(null)}
+                >
+                  ×
+                </button>
+              </div>
+              <p className="site-confirm-message">{confirmDialog.message}</p>
+              <div className="site-confirm-actions">
+                <button
+                  type="button"
+                  className="site-confirm-button site-confirm-button-secondary"
+                  onClick={() => setConfirmDialog(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="site-confirm-button"
+                  onClick={() => {
+                    setConfirmDialog(null);
+                    confirmDialog.onConfirm?.();
+                  }}
+                >
+                  {confirmDialog.confirmLabel}
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
         {error && (
           <p className="user-alert user-alert-error" role="alert">
             {error}
@@ -805,7 +898,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                 type="button"
                 className="reservation-button reservation-release-button"
                 disabled={isSaving}
-                onClick={() => releaseSpace(selectedSpace)}
+                onClick={() => openReleaseConfirmation(selectedSpace)}
               >
                 {isSaving
                   ? "Releasing..."
@@ -830,7 +923,7 @@ const Reservation = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                   selectedSpace.status === "occupied" ||
                   isSaving
                 }
-                onClick={reserveSpace}
+                onClick={openReserveConfirmation}
               >
                 {isSaving
                   ? "Reserving..."

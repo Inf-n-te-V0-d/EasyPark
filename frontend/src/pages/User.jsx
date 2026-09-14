@@ -17,6 +17,7 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null);
   const isAdmin = profile?.role === "admin";
   const activeReservations = reservations.filter((reservation) =>
     activeReservationStatuses.includes(reservation.status),
@@ -60,6 +61,7 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
   const releaseSlot = async (slotId) => {
     setMessage("");
     setError("");
+
     try {
       await apiRequest(`/parking/${slotId}/release`, { method: "POST" });
       setParking((current) =>
@@ -96,6 +98,16 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
     }
   };
 
+  const openReleaseConfirmation = (slotId) => {
+    const slotLabel = parking.find((space) => space._id === slotId)?.slot || "this slot";
+    setConfirmDialog({
+      title: "Release this slot?",
+      message: `Are you sure you want to release slot ${slotLabel}? This will cancel the current reservation.`,
+      confirmLabel: "Release slot",
+      onConfirm: () => releaseSlot(slotId),
+    });
+  };
+
   const signOut = () => {
     clearSession();
     onNavigate?.("home");
@@ -112,6 +124,60 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
       />
       <main className="user-main">
         <BackButton onNavigate={onNavigate} />
+        {confirmDialog && (
+          <div
+            className="site-confirm-modal-backdrop"
+            role="presentation"
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setConfirmDialog(null);
+              }
+            }}
+          >
+            <section
+              className="site-confirm-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="confirm-dialog-title"
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="site-confirm-modal-header">
+                <div>
+                  <p className="reservation-label">Confirm action</p>
+                  <h2 id="confirm-dialog-title">{confirmDialog.title}</h2>
+                </div>
+                <button
+                  type="button"
+                  className="site-confirm-close"
+                  aria-label="Close confirmation"
+                  onClick={() => setConfirmDialog(null)}
+                >
+                  ×
+                </button>
+              </div>
+              <p className="site-confirm-message">{confirmDialog.message}</p>
+              <div className="site-confirm-actions">
+                <button
+                  type="button"
+                  className="site-confirm-button site-confirm-button-secondary"
+                  onClick={() => setConfirmDialog(null)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="site-confirm-button"
+                  onClick={() => {
+                    setConfirmDialog(null);
+                    confirmDialog.onConfirm?.();
+                  }}
+                >
+                  {confirmDialog.confirmLabel}
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
         <header className="user-hero">
           <span className="reservation-eyebrow">EasyPark account</span>
           <h1>
@@ -207,7 +273,7 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                   <button
                     type="button"
                     className="release-button"
-                    onClick={() => releaseSlot(reservation.parkingSlot?._id)}
+                    onClick={() => openReleaseConfirmation(reservation.parkingSlot?._id)}
                   >
                     Release slot
                   </button>
@@ -297,7 +363,7 @@ const User = ({ onNavigate, isDarkMode, onToggleTheme }) => {
                       <button
                         type="button"
                         className="release-button"
-                        onClick={() => releaseSlot(space._id)}
+                        onClick={() => openReleaseConfirmation(space._id)}
                       >
                         Release slot
                       </button>
