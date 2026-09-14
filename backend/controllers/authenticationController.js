@@ -1,4 +1,5 @@
 const bcrypt = require("bcrypt");
+const axios = require("axios");
 const User = require("../models/User");
 const { createToken } = require("../middleware/authMiddleware");
 
@@ -10,15 +11,45 @@ const isStrongPassword = (password) =>
   /\d/.test(password) &&
   /[^A-Za-z0-9]/.test(password);
 
+const verifyTurnstile = async (token) => {
+  if (!token) {
+    return false;
+  }
+
+  try {
+    const response = await axios.post(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: token,
+      },
+    );
+
+    return response.data.success === true;
+  } catch (error) {
+    console.error("Turnstile verification failed:", error.message);
+    return false;
+  }
+};
+
 const signup = async (req, res) => {
   try {
-    const { name, email, password, telephone, vehicleDetails } = req.body;
+    const { name, email, password, telephone, vehicleDetails, turnstileToken } =
+      req.body;
 
     // Check required Fields
     if (!name || !email || !password || !telephone) {
       return res
         .status(400)
         .json({ message: "All required fileds must be provided!" });
+    }
+
+    const turnstileValid = await verifyTurnstile(turnstileToken);
+
+    if (!turnstileValid) {
+      return res.status(403).json({
+        message: "Human verification failed. Please try again.",
+      });
     }
 
     if (!isStrongPassword(password)) {
@@ -63,12 +94,20 @@ const signup = async (req, res) => {
 
 const signin = async (req, res) => {
   try {
-    const { identifier, password } = req.body;
+    const { identifier, password, turnstileToken } = req.body;
 
     if (!identifier || !password) {
       return res
         .status(400)
         .json({ message: "Email/telephone and password are required." });
+    }
+
+    const turnstileValid = await verifyTurnstile(turnstileToken);
+
+    if (!turnstileValid) {
+      return res.status(403).json({
+        message: "Human verification failed. Please try again.",
+      });
     }
 
     // Find by email or telephone

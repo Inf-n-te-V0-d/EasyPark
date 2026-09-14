@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
 import { apiRequest, saveSession } from "../lib/api";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,6 +37,14 @@ export default function Register({ onNavigate }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
 
+  const turnstileRef = useRef(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+
+  const resetTurnstile = () => {
+    turnstileRef.current?.reset();
+    setTurnstileToken("");
+  };
+
   const updateField = ({ target }) => {
     const { name, value } = target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -64,6 +73,11 @@ export default function Register({ onNavigate }) {
     setServerError("");
 
     if (!Object.keys(next).length) {
+      if (!turnstileToken) {
+        setServerError("Please complete the human verification.");
+        return;
+      }
+
       setIsSubmitting(true);
       try {
         const user = await apiRequest("/signup", {
@@ -73,12 +87,17 @@ export default function Register({ onNavigate }) {
             email: form.email,
             telephone: form.telephone,
             password: form.password,
+            turnstileToken,
           }),
         });
         saveSession(user);
+
+        resetTurnstile();
+
         onNavigate?.("home");
       } catch (error) {
         setServerError(error.message);
+        resetTurnstile();
       } finally {
         setIsSubmitting(false);
       }
@@ -235,6 +254,21 @@ export default function Register({ onNavigate }) {
                 {serverError}
               </div>
             )}
+
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onExpire={() => {
+                setTurnstileToken("");
+                setServerError("Human verification expired. Please try again.");
+              }}
+              onError={() => {
+                setTurnstileToken("");
+                setServerError("Human verification failed. Please try again.");
+              }}
+            />
+
             <button
               className="flex h-[52px] items-center justify-between rounded-xl bg-green-500 px-5 text-[13px] font-semibold text-white shadow-[0_10px_20px_rgba(34,197,94,.22)] transition hover:-translate-y-px hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70"
               type="submit"
