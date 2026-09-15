@@ -142,4 +142,5 @@ module.exports = {
   signup,
   signin,
   isStrongPassword,
+  verifyTurnstile,
 };
